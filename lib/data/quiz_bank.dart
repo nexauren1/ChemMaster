@@ -13,7 +13,7 @@ QuizQuestion('q6','8.ª classe','Ligação química','Que tipo de ligação pred
 QuizQuestion('q7','9.ª classe','Neutralização','Que produtos resultam de HCl + KOH?',['KCl + H2O','KOH + Cl2','H2 + KCl','K2O + HCl'],0,'Ácido clorídrico e hidróxido de potássio formam cloreto de potássio e água.'),
 QuizQuestion('q8','9.ª classe','Nomenclatura','Qual é o nome de KOH?',['Óxido de potássio','Ácido potássico','Hidróxido de potássio','Cloreto de potássio'],2,'KOH é o hidróxido de potássio.'),
 QuizQuestion('q9','9.ª classe','Hidrocarbonetos','Qual destas fórmulas representa o eteno?',['C2H6','C2H4','C2H2','CH4'],1,'O eteno é um alceno com uma ligação dupla C=C.'),
-QuizQuestion('q10','9.ª classe','Óxidos','Fe2O3 é denominado:',['Óxido de ferro (III)','Ácido de ferro','Hidróxido de ferro','Cloreto de ferro'],0,'O oxigénio tem número de oxidação −2; o ferro fica em +3.')
+QuizQuestion('q10','9.ª classe','Óxidos','Fe2O3 é denominado:',['Óxido de ferro (III)','Ácido de ferro','Hidróxido de ferro','Cloreto de ferro'],0,'O oxigénio tem número de oxidação −2; o ferro fica em +3.'),
 
 QuizQuestion('q11','10.ª classe','Estequiometria','Na equação 2H2 + O2 → 2H2O, qual é a proporção molar H2:O2?',['1:1','2:1','1:2','2:2'],1,'Os coeficientes indicam uma proporção de 2 mol de H2 para 1 mol de O2.'),
 QuizQuestion('q12','10.ª classe','Enxofre','Qual é a fórmula do dióxido de enxofre?',['SO','SO2','SO3','H2S'],1,'Dióxido indica dois átomos de oxigénio: SO2.'),
