@@ -282,10 +282,50 @@ class SettingsScreen extends StatelessWidget {
   final bool dark;final VoidCallback onTheme;
   const SettingsScreen({super.key,required this.dark,required this.onTheme});
   @override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(18),children:[
-    const Text('Mais',style:TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
-    Card(child:SwitchListTile(value:dark,onChanged:(_)=>onTheme(),title:const Text('Modo escuro'),secondary:const Icon(Icons.dark_mode))),
-    const Card(child:ListTile(leading:Icon(Icons.language),title:Text('Idioma'),subtitle:Text('Português — versão inicial'))),
-    const Card(child:ListTile(leading:Icon(Icons.offline_pin),title:Text('Modo offline'),subtitle:Text('Conteúdos curriculares e ferramentas essenciais funcionam localmente.'))),
-    const Card(child:ListTile(leading:Icon(Icons.info_outline),title:Text('Sobre o ChemMaster'),subtitle:Text('Primeiro mercado: Moçambique. Preparado para expansão internacional.')))
+    const Text('Definições',style:TextStyle(fontSize:28,fontWeight:FontWeight.w900)),
+    const Text('Personaliza a tua experiência de aprendizagem.'),
+    const SizedBox(height:16),
+    _SettingsSection(title:'APARÊNCIA',children:[
+      SwitchListTile(value:dark,onChanged:(_)=>onTheme(),secondary:const Icon(Icons.dark_mode_outlined,color:cyan),title:const Text('Modo escuro'),subtitle:Text(dark?'Tema azul neon activo':'Tema claro activo')),
+      const ListTile(leading:Icon(Icons.palette_outlined,color:violet),title:Text('Identidade visual'),subtitle:Text('Azul eléctrico • Ciano • Violeta')),
+    ]),
+    _SettingsSection(title:'PREFERÊNCIAS',children:[
+      const ListTile(leading:Icon(Icons.language,color:cyan),title:Text('Idioma'),subtitle:Text('Português (Moçambique) • Outros idiomas numa próxima versão')),
+      const ListTile(leading:Icon(Icons.offline_pin_outlined,color:cyan),title:Text('Acesso offline'),subtitle:Text('Aulas, tabela periódica e ferramentas disponíveis sem Internet')),
+      const ListTile(leading:Icon(Icons.notifications_none,color:cyan),title:Text('Notificações'),subtitle:Text('Lembretes de estudo — brevemente')),
+    ]),
+    _SettingsSection(title:'DADOS E PRIVACIDADE',children:[
+      const ListTile(leading:Icon(Icons.phone_android,color:cyan),title:Text('Armazenamento local'),subtitle:Text('O progresso é guardado neste dispositivo.')),
+      ListTile(leading:const Icon(Icons.delete_outline,color:Colors.orange),title:const Text('Limpar progresso'),subtitle:const Text('Apagar lições concluídas e resultados guardados.'),onTap:()async{
+        final confirmed=await showDialog<bool>(context:context,builder:(dialogContext)=>AlertDialog(
+          title:const Text('Limpar progresso?'),
+          content:const Text('Esta acção apaga as lições concluídas e os resultados guardados neste dispositivo.'),
+          actions:[
+            TextButton(onPressed:()=>Navigator.pop(dialogContext,false),child:const Text('Cancelar')),
+            FilledButton(onPressed:()=>Navigator.pop(dialogContext,true),child:const Text('Limpar')),
+          ],
+        ));
+        if(confirmed==true){
+          await ProgressStore.clear();
+          if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Progresso apagado.')));
+        }
+      }),
+    ]),
+    _SettingsSection(title:'SOBRE',children:[
+      const ListTile(leading:Icon(Icons.science_outlined,color:cyan),title:Text('ChemMaster'),subtitle:Text('Aprender • Praticar • Conquistar')),
+      const ListTile(leading:Icon(Icons.public,color:cyan),title:Text('Desenvolvido para Moçambique'),subtitle:Text('Com visão de expansão para estudantes de todo o mundo.')),
+      const ListTile(leading:Icon(Icons.info_outline,color:cyan),title:Text('Versão 1.0.0'),subtitle:Text('Primeira versão de aprendizagem química.')),
+    ]),
   ]);
+}
+class _SettingsSection extends StatelessWidget {
+  final String title;final List<Widget> children;
+  const _SettingsSection({required this.title,required this.children});
+  @override Widget build(BuildContext context)=>Padding(
+    padding:const EdgeInsets.only(bottom:14),
+    child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+      Padding(padding:const EdgeInsets.only(left:5,bottom:6),child:Text(title,style:const TextStyle(fontSize:11,letterSpacing:1.4,fontWeight:FontWeight.w900,color:cyan))),
+      Card(child:Column(children:children)),
+    ]),
+  );
 }
