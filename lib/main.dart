@@ -76,7 +76,7 @@ class AcademyPage extends StatelessWidget {
       const Text('Academia', style: TextStyle(fontSize: 27, fontWeight: FontWeight.w900)),
       const Text('Percurso de aprendizagem para Moçambique.'),
       const SizedBox(height: 14),
-      Wrap(spacing: 7, children: ['7.ª','8.ª','9.ª','10.ª','11.ª','12.ª'].map((s) => ChoiceChip(label: Text(s), selected: s == '10.ª', onSelected: (_) {})).toList()),
+      Wrap(spacing: 7, children: ['8.ª','9.ª','10.ª','11.ª','12.ª'].map((s) => ChoiceChip(label: Text(s), selected: s == '9.ª', onSelected: (_) {})).toList()),
       const SizedBox(height: 12),
       ...topics.map((t) => Card(child: ListTile(leading: const Icon(Icons.science, color: cyan), title: Text(t), subtitle: const Text('Aulas • Exemplos • Exercícios'), trailing: const Icon(Icons.chevron_right), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => TopicPage(title: t)))))),
       const Text('A distribuição por classe será validada com os programas oficiais.', style: TextStyle(color: Colors.amber, fontSize: 12))]);
