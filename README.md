@@ -6,7 +6,7 @@ Aplicação Android-first de aprendizagem de Química. O primeiro mercado é Mo�
 
 - Interface Flutter em português, com tema escuro/claro.
 - Navegação Início, Academia, Ferramentas, Progresso e Mais.
-- Conteúdos curriculares iniciais para 7.ª, 8.ª e 9.ª classes, organizados por unidades e lições expansíveis.
+- Conteúdos curriculares iniciais para 7.ª a 12.ª classes, organizados por ciclos, classes, unidades e lições expansíveis.
 - Lições com resumo, explicação, exemplo e opção para marcar como concluída.
 - Tabela periódica com 118 elementos, pesquisa por nome, símbolo ou número atómico.
 - Parser de fórmulas com grupos entre parênteses.
@@ -19,11 +19,11 @@ Aplicação Android-first de aprendizagem de Química. O primeiro mercado é Mo�
 
 ## Base curricular
 
-A organização inicial do primeiro ciclo segue o documento do INDE/MEC, Programa de Ensino da Disciplina de Química — Ensino Secundário, 1.º Ciclo. O programa organiza os conteúdos da 7.ª, 8.ª e 9.ª classes em unidades temáticas.
+A organização curricular segue os documentos do INDE/MEC para o Ensino Secundário, 1.º Ciclo (7.ª, 8.ª e 9.ª classes) e 2.º Ciclo (10.ª, 11.ª e 12.ª classes). Os conteúdos estão distribuídos pelas unidades temáticas indicadas nos respectivos programas.
 
-Fonte consultada: https://ieda.gov.mz/site/wp-content/uploads/2020/10/ANEXO_X_PROGRAMA_QUIMICA_ES_I_CICLO_GM_11_02_26_assinado.pdf
+Fontes consultadas:\n- 1.º Ciclo: https://ieda.gov.mz/site/wp-content/uploads/2020/10/ANEXO_X_PROGRAMA_QUIMICA_ES_I_CICLO_GM_11_02_26_assinado.pdf\n- 2.º Ciclo: https://ieda.gov.mz/site/wp-content/uploads/2020/10/ANEXO_X_PROGRAMA_QUIMICA_ES_II_CICLO_GM_11_02_26_assinado.pdf
 
-A cobertura de 10.ª, 11.ª e 12.ª classes não está declarada como currículo oficial nesta versão. Será adicionada após consulta e validação dos respectivos programas do segundo ciclo. Os textos explicativos e exemplos incluídos na app são materiais didácticos redigidos para apoiar os tópicos curriculares, não transcrições integrais do documento oficial.
+A estrutura cobre as seis classes do ensino secundário. As lições são resumos didácticos iniciais dos tópicos dos programas; não constituem ainda cobertura integral de cada objectivo, trimestre ou carga horária. Devem ser revistas por professores antes de uma publicação escolar formal. Os textos explicativos e exemplos incluídos na app são materiais didácticos redigidos para apoiar os tópicos curriculares, não transcrições integrais do documento oficial.
 
 ## Limitações científicas a validar antes de publicação
 
