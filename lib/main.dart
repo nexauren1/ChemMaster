@@ -170,7 +170,33 @@ class _PeriodicScreenState extends State<PeriodicScreen>{
 }
 class ReactionScreen extends StatelessWidget {
   const ReactionScreen({super.key});
-  @override Widget build(BuildContext context){const rows=[('Síntese','A + B → AB','2H₂ + O₂ → 2H₂O'),('Decomposição','AB → A + B','2H₂O₂ → 2H₂O + O₂'),('Deslocamento simples','A + BC → AC + B','Zn + 2HCl → ZnCl₂ + H₂'),('Dupla troca','AB + CD → AD + CB','AgNO₃ + NaCl → AgCl + NaNO₃'),('Neutralização','Ácido + Base → Sal + Água','HCl + KOH → KCl + H₂O')];return Scaffold(appBar:AppBar(title:const Text('Tipos de reacções')),body:ListView(padding:const EdgeInsets.all(16),children:rows.map((r)=>Card(child:ExpansionTile(title:Text(r.$1),subtitle:Text(r.$2),leading:const Icon(Icons.science,color:cyan),children:[Padding(padding:const EdgeInsets.all(16),child:Text('Exemplo: ${r.$3}'))])).toList()));}
+  @override
+  Widget build(BuildContext context) {
+    const rows=[
+      ('Síntese','A + B → AB','2H₂ + O₂ → 2H₂O'),
+      ('Decomposição','AB → A + B','2H₂O₂ → 2H₂O + O₂'),
+      ('Deslocamento simples','A + BC → AC + B','Zn + 2HCl → ZnCl₂ + H₂'),
+      ('Dupla troca','AB + CD → AD + CB','AgNO₃ + NaCl → AgCl + NaNO₃'),
+      ('Neutralização','Ácido + Base → Sal + Água','HCl + KOH → KCl + H₂O')
+    ];
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tipos de reacções')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: rows.map((r) => Card(
+          child: ExpansionTile(
+            title: Text(r.$1),
+            subtitle: Text(r.$2),
+            leading: const Icon(Icons.science, color: cyan),
+            children: [Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Exemplo: ${r.$3}'),
+            )],
+          ),
+        )).toList(),
+      ),
+    );
+  }
 }
 class NomenclatureScreen extends StatelessWidget {
   const NomenclatureScreen({super.key});
@@ -189,13 +215,23 @@ class _NameCard extends StatelessWidget {
 
 class QuizScreen extends StatefulWidget {const QuizScreen({super.key});@override State<QuizScreen> createState()=>_QuizScreenState();}
 class _QuizScreenState extends State<QuizScreen>{
-  String grade='Todas';int index=0,score=0;int? selected;bool submitted=false,finished=false;
+  String grade='Todas';int index=0,score=0;int? selected;bool finished=false;
   List<QuizQuestion> get questions=>quizBank.where((q)=>grade=='Todas'||q.grade==grade).toList();
-  void next(){if(selected==null)return;final q=questions[index];if(selected==q.answer)score++;if(index+1>=questions.length){setState(()=>finished=true);ProgressStore.saveQuiz('quiz-$grade',score,questions.length);}else{setState(()=>{index++,selected=null});}}
+  void next(){
+    if(selected==null)return;
+    final q=questions[index];
+    if(selected==q.answer)score++;
+    if(index+1>=questions.length){
+      setState(() { finished=true; });
+      ProgressStore.saveQuiz('quiz-$grade',score,questions.length);
+    } else {
+      setState(() { index++; selected=null; });
+    }
+  }
   @override Widget build(BuildContext context){
     final qs=questions;
-    return Scaffold(appBar:AppBar(title:const Text('Exercícios e avaliações')),body:finished?Center(child:Padding(padding:const EdgeInsets.all(24),child:Column(mainAxisSize:MainAxisSize.min,children:[const Icon(Icons.emoji_events,color:Colors.amber,size:64),Text('Resultado: $score / ${qs.length}',style:const TextStyle(fontSize:25,fontWeight:FontWeight.bold)),const SizedBox(height:12),FilledButton(onPressed:()=>setState(()=>{index=0,score=0,selected=null,finished=false}),child:const Text('Repetir avaliação'))]))):ListView(padding:const EdgeInsets.all(18),children:[
-      DropdownButtonFormField<String>(value:grade,decoration:const InputDecoration(labelText:'Classe',border:OutlineInputBorder()),items:['Todas','7.ª classe','8.ª classe','9.ª classe'].map((v)=>DropdownMenuItem(value:v,child:Text(v))).toList(),onChanged:(v)=>setState(()=>{grade=v!,index=0,score=0,selected=null,finished=false})),
+    return Scaffold(appBar:AppBar(title:const Text('Exercícios e avaliações')),body:finished?Center(child:Padding(padding:const EdgeInsets.all(24),child:Column(mainAxisSize:MainAxisSize.min,children:[const Icon(Icons.emoji_events,color:Colors.amber,size:64),Text('Resultado: $score / ${qs.length}',style:const TextStyle(fontSize:25,fontWeight:FontWeight.bold)),const SizedBox(height:12),FilledButton(onPressed:()=>setState(() { index=0; score=0; selected=null; finished=false; }),child:const Text('Repetir avaliação'))]))):ListView(padding:const EdgeInsets.all(18),children:[
+      DropdownButtonFormField<String>(value:grade,decoration:const InputDecoration(labelText:'Classe',border:OutlineInputBorder()),items:['Todas','7.ª classe','8.ª classe','9.ª classe'].map((v)=>DropdownMenuItem(value:v,child:Text(v))).toList(),onChanged:(v)=>setState(() { grade=v!; index=0; score=0; selected=null; finished=false; })),
       const SizedBox(height:18),Text('Questão ${index+1} de ${qs.length}',style:const TextStyle(color:cyan)),
       Text(qs[index].prompt,style:const TextStyle(fontSize:20,fontWeight:FontWeight.bold)),
       const SizedBox(height:12),...List.generate(qs[index].options.length,(i)=>Card(child:RadioListTile<int>(value:i,groupValue:selected,title:Text(qs[index].options[i]),onChanged:(v)=>setState(()=>selected=v)))),
