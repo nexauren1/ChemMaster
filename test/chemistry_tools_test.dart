@@ -41,7 +41,7 @@ void main() {
     expect(periodicElements.map((e) => e.number).toList(), List.generate(118, (i) => i + 1));
   });
   test('curriculum contains the three first-cycle grades', () {
-    expect(mozambiqueCurriculum.map((c) => c.grade).toList(), ['7.ª classe', '8.ª classe', '9.ª classe']);
+    expect(mozambiqueCurriculum.map((c) => c.grade).toList(), ['7.ª classe', '8.ª classe', '9.ª classe', '10.ª classe', '11.ª classe', '12.ª classe']);
   });
   test('local progress persists completed lessons and quiz scores', () async {
     SharedPreferences.setMockInitialValues({});
