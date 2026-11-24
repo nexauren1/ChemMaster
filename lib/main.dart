@@ -51,7 +51,7 @@ class HomePage extends StatelessWidget {
     GridView.count(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.5, children: [
       QuickCard(icon: Icons.menu_book, title: 'Academia', detail: 'Aulas e capítulos', color: blue, tap: () => open(1)),
       QuickCard(icon: Icons.functions, title: 'Equações', detail: 'Balancear reações', color: violet, tap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BalancePage()))),
-      QuickCard(icon: Icons.calculate, title: 'Calculadoras', detail: 'Massa molar', color: cyan, tap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CalculatorPage()))),
+      QuickCard(icon: Icons.calculate, title: 'Calculadoras', detail: 'Massa molar', color: cyan, tap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ScientificCalculatorsPage()))),
       QuickCard(icon: Icons.grid_on, title: 'Tabela periódica', detail: 'Elementos químicos', color: Colors.orange, tap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PeriodicPage())))]),
     const SizedBox(height: 18), const InfoTile(icon: Icons.water_drop, title: 'Ácidos, bases e sais', subtitle: 'Funções inorgânicas', color: cyan),
     const InfoTile(icon: Icons.sync_alt, title: 'Reações químicas', subtitle: 'Tipos, produtos e equações', color: violet)]);
@@ -97,7 +97,7 @@ class ToolsPage extends StatelessWidget {
   @override Widget build(BuildContext context) {
     final entries = <(String,String,IconData,Widget)>[
       ('Balancear equações','Ajusta coeficientes',Icons.functions,const BalancePage()),
-      ('Calculadora química','Massa molar',Icons.calculate,const CalculatorPage()),
+      ('Calculadora química','Massa molar',Icons.calculate,const ScientificCalculatorsPage()),
       ('Tabela periódica','Elementos e propriedades',Icons.grid_on,const PeriodicPage()),
       ('Tipos de reações','Classificação de reações',Icons.sync_alt,const ReactionPage()),
       ('Nomenclatura','Óxidos, ácidos, bases e sais',Icons.spellcheck,const NomenclaturePage()),
@@ -206,3 +206,77 @@ class ProgressPage extends StatelessWidget {const ProgressPage({super.key});@ove
 class SettingsPage extends StatelessWidget {final bool dark;final VoidCallback toggle;const SettingsPage({super.key,required this.dark,required this.toggle});@override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(20),children:[
   const Text('Mais',style:TextStyle(fontSize:27,fontWeight:FontWeight.w900)),Card(child:SwitchListTile(value:dark,onChanged:(_)=>toggle(),title:const Text('Modo escuro'),secondary:const Icon(Icons.dark_mode))),
   const Card(child:ListTile(leading:Icon(Icons.language),title:Text('Idioma'),subtitle:Text('Português — inicial'))),const Card(child:ListTile(leading:Icon(Icons.download_for_offline),title:Text('Conteúdos offline'),subtitle:Text('Preparado para pacotes locais.')))]);}
+
+
+class ScientificCalculatorsPage extends StatefulWidget {
+  const ScientificCalculatorsPage({super.key});
+  @override State<ScientificCalculatorsPage> createState() => _ScientificCalculatorsPageState();
+}
+class _ScientificCalculatorsPageState extends State<ScientificCalculatorsPage> {
+  final formula = TextEditingController(text: 'H2SO4');
+  final sampleMass = TextEditingController(text: '10');
+  final molarMass = TextEditingController(text: '98.08');
+  final moles = TextEditingController(text: '0.5');
+  final volume = TextEditingController(text: '2');
+  String massResult = '—', moleResult = '—', concentrationResult = '—';
+  static const weights = {'H':1.008,'C':12.011,'N':14.007,'O':15.999,'Na':22.990,'Mg':24.305,'Al':26.982,'P':30.974,'S':32.06,'Cl':35.45,'K':39.098,'Ca':40.078,'Fe':55.845,'Cu':63.546,'Zn':65.38,'Ag':107.868};
+  double molarMassOf(String f) {
+    final atoms = Balancer.parse(f);
+    double total = 0;
+    atoms.forEach((e,n) {
+      final weight = weights[e];
+      if (weight == null) throw Exception('Massa atómica ainda não disponível para ' + e);
+      total += weight * n;
+    });
+    return total;
+  }
+  void calcMass() {
+    try { setState(() { massResult = molarMassOf(formula.text.trim()).toStringAsFixed(2) + ' g/mol'; }); }
+    catch(e) { setState(() { massResult = e.toString(); }); }
+  }
+  void calcMoles() {
+    try {
+      final m = double.parse(sampleMass.text.replaceAll(',', '.'));
+      final mm = double.parse(molarMass.text.replaceAll(',', '.'));
+      if (m < 0 || mm <= 0) throw Exception('Usa valores positivos.');
+      setState(() { moleResult = (m / mm).toStringAsFixed(4) + ' mol'; });
+    } catch(e) { setState(() { moleResult = 'Verifica os valores introduzidos.'; }); }
+  }
+  void calcConcentration() {
+    try {
+      final n = double.parse(moles.text.replaceAll(',', '.'));
+      final v = double.parse(volume.text.replaceAll(',', '.'));
+      if (n < 0 || v <= 0) throw Exception('O volume deve ser superior a zero.');
+      setState(() { concentrationResult = (n / v).toStringAsFixed(4) + ' mol/L'; });
+    } catch(e) { setState(() { concentrationResult = 'Verifica os valores introduzidos.'; }); }
+  }
+  InputDecoration field(String label) => InputDecoration(labelText: label, border: const OutlineInputBorder());
+  @override Widget build(BuildContext context) => DefaultTabController(length: 3, child: Scaffold(
+    appBar: AppBar(title: const Text('Calculadoras químicas'), bottom: const TabBar(tabs: [
+      Tab(text: 'Massa molar'), Tab(text: 'Mol'), Tab(text: 'Concentração')])),
+    body: TabBarView(children: [
+      ListView(padding: const EdgeInsets.all(18), children: [
+        const Text('Calcula a massa molar de uma substância.', style: TextStyle(fontSize: 17)),
+        const SizedBox(height: 14), TextField(controller: formula, decoration: field('Fórmula química')),
+        const SizedBox(height: 12), FilledButton(onPressed: calcMass, child: const Text('Calcular massa molar')),
+        Card(child: Padding(padding: const EdgeInsets.all(18), child: Text(massResult, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: cyan)))),
+      ]),
+      ListView(padding: const EdgeInsets.all(18), children: [
+        const Text('Quantidade de matéria: n = m / M', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+        const Text('m = massa da amostra (g); M = massa molar (g/mol).'),
+        const SizedBox(height: 14), TextField(controller: sampleMass, keyboardType: TextInputType.number, decoration: field('Massa da amostra (g)')),
+        const SizedBox(height: 10), TextField(controller: molarMass, keyboardType: TextInputType.number, decoration: field('Massa molar (g/mol)')),
+        const SizedBox(height: 12), FilledButton(onPressed: calcMoles, child: const Text('Calcular quantidade de matéria')),
+        Card(child: Padding(padding: const EdgeInsets.all(18), child: Text(moleResult, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: cyan)))),
+      ]),
+      ListView(padding: const EdgeInsets.all(18), children: [
+        const Text('Concentração molar: C = n / V', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
+        const Text('n = quantidade de matéria (mol); V = volume da solução (L).'),
+        const SizedBox(height: 14), TextField(controller: moles, keyboardType: TextInputType.number, decoration: field('Quantidade de matéria (mol)')),
+        const SizedBox(height: 10), TextField(controller: volume, keyboardType: TextInputType.number, decoration: field('Volume da solução (L)')),
+        const SizedBox(height: 12), FilledButton(onPressed: calcConcentration, child: const Text('Calcular concentração')),
+        Card(child: Padding(padding: const EdgeInsets.all(18), child: Text(concentrationResult, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: cyan)))),
+      ]),
+    ]),
+  ));
+}
