@@ -17,9 +17,18 @@ class _ChemMasterAppState extends State<ChemMasterApp> {
   bool dark=true;
   @override Widget build(BuildContext context)=>MaterialApp(
     debugShowCheckedModeBanner:false,title:'ChemMaster',
-    theme:ThemeData(useMaterial3:true,brightness:dark?Brightness.dark:Brightness.light,
-      colorScheme:ColorScheme.fromSeed(seedColor:blue,brightness:dark?Brightness.dark:Brightness.light),
-      scaffoldBackgroundColor:dark?navy:const Color(0xFFF3F7FF)),
+    theme:ThemeData(
+      useMaterial3:true,
+      brightness:dark?Brightness.dark:Brightness.light,
+      colorScheme:ColorScheme.fromSeed(seedColor:blue,brightness:dark?Brightness.dark:Brightness.light,primary:blue,secondary:cyan,tertiary:violet,surface:dark?const Color(0xFF0B1D43):Colors.white),
+      scaffoldBackgroundColor:dark?navy:const Color(0xFFF3F7FF),
+      appBarTheme:AppBarTheme(backgroundColor:dark?navy:const Color(0xFFF3F7FF),foregroundColor:dark?Colors.white:const Color(0xFF071A3A),elevation:0,centerTitle:false),
+      cardTheme:CardThemeData(color:dark?const Color(0xFF0D2452):Colors.white,elevation:dark?5:2,shadowColor:blue.withValues(alpha:.22),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(20),side:BorderSide(color:dark?cyan.withValues(alpha:.22):blue.withValues(alpha:.10))),margin:const EdgeInsets.symmetric(vertical:7)),
+      inputDecorationTheme:InputDecorationTheme(filled:true,fillColor:dark?const Color(0xFF102B5D):const Color(0xFFF0F5FF),border:OutlineInputBorder(borderRadius:BorderRadius.circular(15)),enabledBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(15),borderSide:BorderSide(color:dark?cyan.withValues(alpha:.22):blue.withValues(alpha:.16))),focusedBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(15),borderSide:const BorderSide(color:cyan,width:1.7)),contentPadding:const EdgeInsets.symmetric(horizontal:16,vertical:15)),
+      filledButtonTheme:FilledButtonThemeData(style:FilledButton.styleFrom(backgroundColor:blue,foregroundColor:Colors.white,minimumSize:const Size.fromHeight(52),shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(16)),textStyle:const TextStyle(fontWeight:FontWeight.w800))),
+      navigationBarTheme:NavigationBarThemeData(backgroundColor:dark?const Color(0xFF071A3A):Colors.white,indicatorColor:cyan.withValues(alpha:.18),labelTextStyle:WidgetStateProperty.all(const TextStyle(fontSize:10,fontWeight:FontWeight.w700))),
+      dividerColor:dark?cyan.withValues(alpha:.12):blue.withValues(alpha:.10),
+    ),
     home:AppShell(dark:dark,onTheme:()=>setState(()=>dark=!dark)));
 }
 class AppShell extends StatefulWidget {
@@ -71,7 +80,7 @@ class _AcademyScreenState extends State<AcademyScreen> {
     final selected=mozambiqueCurriculum.firstWhere((c)=>c.grade==grade);
     return ListView(padding:const EdgeInsets.all(18),children:[
       const Text('Academia',style:TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
-      const Text('Programa do 1.º ciclo — Moçambique'),
+      const Text('Programa de Química • 7.ª à 12.ª classe • Moçambique'),
       const SizedBox(height:12),
       Wrap(spacing:7,children:mozambiqueCurriculum.map((c)=>ChoiceChip(label:Text(c.grade),selected:grade==c.grade,onSelected:(_)=>setState(()=>grade=c.grade))).toList()),
       const SizedBox(height:12),
@@ -82,7 +91,7 @@ class _AcademyScreenState extends State<AcademyScreen> {
           title:Text(l.title),subtitle:Text(l.summary,maxLines:2,overflow:TextOverflow.ellipsis),
           trailing:const Icon(Icons.arrow_forward_ios,size:15),
           onTap:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>LessonScreen(lesson:l,grade:grade))))).toList()))),
-      const SizedBox(height:8),const Text('A organização segue o programa do INDE/MEC para 7.ª, 8.ª e 9.ª classes. A cobertura das classes seguintes será adicionada após validação dos respectivos programas.',style:TextStyle(fontSize:12,color:Colors.amber))
+      const SizedBox(height:8),const Text('Conteúdos introdutórios organizados para as seis classes. A cobertura detalhada será ampliada e revista continuamente.',style:TextStyle(fontSize:12,color:Colors.amber))
     ]);
   }
 }
