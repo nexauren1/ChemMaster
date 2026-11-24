@@ -8,6 +8,16 @@ import 'services/progress_store.dart';
 
 void main() => runApp(const ChemMasterApp());
 const navy=Color(0xFF06142F),blue=Color(0xFF087BFF),cyan=Color(0xFF16D9F5),violet=Color(0xFF762BFF);
+Route<T> neonRoute<T>(Widget page)=>PageRouteBuilder<T>(
+  pageBuilder:(context,animation,secondaryAnimation)=>page,
+  transitionDuration:const Duration(milliseconds:280),
+  transitionsBuilder:(context,animation,secondaryAnimation,child){
+    final curved=CurvedAnimation(parent:animation,curve:Curves.easeOutCubic);
+    return FadeTransition(opacity:curved,child:ScaleTransition(
+      scale:Tween<double>(begin:.975,end:1).animate(curved),child:child));
+  },
+);
+
 
 class ChemMasterApp extends StatefulWidget {
   const ChemMasterApp({super.key});
@@ -61,16 +71,32 @@ class HomeScreen extends StatelessWidget {
     const SizedBox(height:20),const Text('Acesso rápido',style:TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
     GridView.count(shrinkWrap:true,physics:const NeverScrollableScrollPhysics(),crossAxisCount:2,crossAxisSpacing:10,mainAxisSpacing:10,childAspectRatio:1.5,children:[
       _HomeCard(icon:Icons.menu_book,title:'Academia',detail:'Classes e lições',onTap:()=>onTab(1)),
-      _HomeCard(icon:Icons.functions,title:'Equações',detail:'Balanceamento',onTap:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>const BalanceScreen()))),
-      _HomeCard(icon:Icons.calculate,title:'Calculadoras',detail:'Massa, mol e soluções',onTap:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>const CalculatorsScreen()))),
-      _HomeCard(icon:Icons.grid_on,title:'Tabela periódica',detail:'118 elementos',onTap:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>const PeriodicScreen()))) ]),
-    const SizedBox(height:12),Card(child:ListTile(leading:const Icon(Icons.quiz,color:cyan),title:const Text('Avaliar conhecimentos'),subtitle:const Text('Exercícios por classe'),trailing:const Icon(Icons.chevron_right),onTap:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>const QuizScreen()))))
+      _HomeCard(icon:Icons.functions,title:'Equações',detail:'Balanceamento',onTap:()=>Navigator.push(context,neonRoute(const BalanceScreen()))),
+      _HomeCard(icon:Icons.calculate,title:'Calculadoras',detail:'Massa, mol e soluções',onTap:()=>Navigator.push(context,neonRoute(const CalculatorsScreen()))),
+      _HomeCard(icon:Icons.grid_on,title:'Tabela periódica',detail:'118 elementos',onTap:()=>Navigator.push(context,neonRoute(const PeriodicScreen()))) ]),
+    const SizedBox(height:12),Card(child:ListTile(leading:const Icon(Icons.quiz,color:cyan),title:const Text('Avaliar conhecimentos'),subtitle:const Text('Exercícios por classe'),trailing:const Icon(Icons.chevron_right),onTap:()=>Navigator.push(context,neonRoute(const QuizScreen()))))
   ]);
 }
 class _HomeCard extends StatelessWidget {
   final IconData icon;final String title,detail;final VoidCallback onTap;
   const _HomeCard({required this.icon,required this.title,required this.detail,required this.onTap});
-  @override Widget build(BuildContext context)=>Card(child:InkWell(onTap:onTap,borderRadius:BorderRadius.circular(18),child:Padding(padding:const EdgeInsets.all(14),child:Column(mainAxisAlignment:MainAxisAlignment.center,crossAxisAlignment:CrossAxisAlignment.start,children:[Icon(icon,color:cyan,size:27),const SizedBox(height:8),Text(title,style:const TextStyle(fontWeight:FontWeight.bold)),Text(detail,style:const TextStyle(fontSize:11,color:Colors.grey))]))));
+  @override Widget build(BuildContext context)=>Container(
+    decoration:BoxDecoration(
+      borderRadius:BorderRadius.circular(20),
+      gradient:const LinearGradient(begin:Alignment.topLeft,end:Alignment.bottomRight,colors:[Color(0xFF123879),Color(0xFF091A3D)]),
+      border:Border.all(color:cyan.withValues(alpha:.34)),
+      boxShadow:[BoxShadow(color:blue.withValues(alpha:.16),blurRadius:17,offset:const Offset(0,5))],
+    ),
+    child:InkWell(onTap:onTap,borderRadius:BorderRadius.circular(20),child:Padding(
+      padding:const EdgeInsets.all(14),
+      child:Column(mainAxisAlignment:MainAxisAlignment.center,crossAxisAlignment:CrossAxisAlignment.start,children:[
+        Container(width:42,height:42,decoration:BoxDecoration(borderRadius:BorderRadius.circular(14),gradient:const LinearGradient(colors:[blue,violet]),boxShadow:[BoxShadow(color:cyan.withValues(alpha:.24),blurRadius:12)]),child:Icon(icon,color:Colors.white,size:24)),
+        const SizedBox(height:10),
+        Text(title,style:const TextStyle(fontWeight:FontWeight.w900,color:Colors.white)),
+        Text(detail,style:TextStyle(fontSize:11,color:Colors.white.withValues(alpha:.72))),
+      ]),
+    )),
+  );
 }
 
 class AcademyScreen extends StatefulWidget {const AcademyScreen({super.key});@override State<AcademyScreen> createState()=>_AcademyScreenState();}
@@ -90,7 +116,7 @@ class _AcademyScreenState extends State<AcademyScreen> {
         children:u.lessons.map((l)=>ListTile(
           title:Text(l.title),subtitle:Text(l.summary,maxLines:2,overflow:TextOverflow.ellipsis),
           trailing:const Icon(Icons.arrow_forward_ios,size:15),
-          onTap:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>LessonScreen(lesson:l,grade:grade))))).toList()))),
+          onTap:()=>Navigator.push(context,neonRoute(LessonScreen(lesson:l,grade:grade))))).toList()))),
       const SizedBox(height:8),const Text('Conteúdos introdutórios organizados para as seis classes. A cobertura detalhada será ampliada e revista continuamente.',style:TextStyle(fontSize:12,color:Colors.amber))
     ]);
   }
@@ -122,7 +148,7 @@ class ToolsScreen extends StatelessWidget {
 class _ToolTile extends StatelessWidget {
   final String title,detail;final IconData icon;final Widget page;
   const _ToolTile(this.title,this.detail,this.icon,this.page);
-  @override Widget build(BuildContext context)=>Card(child:ListTile(leading:Icon(icon,color:cyan,size:28),title:Text(title),subtitle:Text(detail),trailing:const Icon(Icons.chevron_right),onTap:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>page))));
+  @override Widget build(BuildContext context)=>Card(child:ListTile(leading:Icon(icon,color:cyan,size:28),title:Text(title),subtitle:Text(detail),trailing:const Icon(Icons.chevron_right),onTap:()=>Navigator.push(context,neonRoute(page))));
 }
 
 class BalanceScreen extends StatefulWidget {const BalanceScreen({super.key});@override State<BalanceScreen> createState()=>_BalanceScreenState();}
