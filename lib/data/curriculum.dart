@@ -81,4 +81,58 @@ CurriculumUnit('VI — Hidrocarbonetos',[
 Lesson('9-vi-1','Alcanos, alcenos e alcinos','Hidrocarbonetos e petróleo.','Hidrocarbonetos contêm carbono e hidrogénio. Alcanos têm ligações simples; alcenos têm pelo menos uma ligação dupla; alcinos têm pelo menos uma ligação tripla.','Etano: C2H6; eteno: C2H4; etino: C2H2.')
 ])
 ])
+
+CurriculumClass('10.ª classe',[
+CurriculumUnit('I — Fundamentos de Química',[
+Lesson('10-i-1','Química e método científico','Conceitos fundamentais e investigação.','A Química estuda as substâncias, as suas propriedades e transformações. O método científico envolve observação, formulação de problemas e hipóteses, experimentação, análise de resultados e conclusão.','Uma investigação sobre a velocidade de dissolução deve controlar as condições e registar os resultados.'),
+Lesson('10-i-2','Linguagem química e estequiometria','Equações, leis ponderais e cálculos.','A linguagem química utiliza símbolos, fórmulas, equações, coeficientes e índices. Os cálculos estequiométricos aplicam a conservação da massa, as proporções definidas e a relação entre mol, massa e volume.','Na equação 2H2 + O2 → 2H2O, a proporção molar H2:O2:H2O é 2:1:2.')
+]),
+CurriculumUnit('II — Enxofre e elementos do VI grupo principal',[
+Lesson('10-ii-1','Enxofre e seus compostos','Ocorrência, propriedades e aplicações.','O enxofre ocorre na natureza e forma óxidos como SO2 e SO3. O ácido sulfúrico tem importância industrial e agrícola. Compostos de enxofre incluem sulfuretos, sulfitos e sulfatos.','SO3 + H2O → H2SO4 é uma representação simplificada da formação de ácido sulfúrico.')
+]),
+CurriculumUnit('III — Nitrogénio e elementos do V grupo principal',[
+Lesson('10-iii-1','Nitrogénio e fósforo','Elementos do grupo VA e fertilizantes.','O nitrogénio e o fósforo formam compostos importantes para a vida e a agricultura. O estudo inclui propriedades dos elementos, compostos de nitrogénio e fósforo e adubos.','Os fertilizantes fornecem nutrientes essenciais às plantas; a sua aplicação deve respeitar as doses recomendadas.')
+]),
+CurriculumUnit('IV — Funções orgânicas oxigenadas',[
+Lesson('10-iv-1','Álcoois, fenóis e éteres','Grupos funcionais oxigenados.','As funções orgânicas são identificadas pelos grupos funcionais. Álcoois possuem grupo hidroxilo ligado a carbono saturado; fenóis têm hidroxilo ligado directamente a anel aromático; éteres apresentam oxigénio entre dois grupos orgânicos.','Etanol: CH3CH2OH; dimetil éter: CH3OCH3.')
+])
+]),
+CurriculumClass('11.ª classe',[
+CurriculumUnit('I — Estrutura atómica',[
+Lesson('11-i-1','Modelos atómicos e mecânica quântica','Partículas fundamentais e modelos.','O estudo da estrutura atómica aborda protões, neutrões e electrões, radioactividade, experiência de Rutherford, postulados de Bohr e introdução à mecânica quântica.','O número atómico corresponde ao número de protões do núcleo.')
+]),
+CurriculumUnit('II — Tabela periódica',[
+Lesson('11-ii-1','Lei periódica e propriedades','Organização e tendências periódicas.','A tabela periódica moderna organiza os elementos por número atómico. As propriedades periódicas variam ao longo dos períodos e grupos e ajudam a explicar o comportamento químico.','Elementos do mesmo grupo tendem a apresentar semelhanças químicas.')
+]),
+CurriculumUnit('III — Ligação química',[
+Lesson('11-iii-1','Ligações e estrutura de Lewis','Ligação iónica, covalente e metálica.','A ligação química pode ser iónica, covalente ou metálica. As estruturas de Lewis representam electrões de valência e ajudam a interpretar ligações.','NaCl é um exemplo de composto predominantemente iónico; H2 apresenta ligação covalente.')
+]),
+CurriculumUnit('IV — Classes principais dos compostos inorgânicos',[
+Lesson('11-iv-1','Óxidos, ácidos, bases e sais','Nomenclatura e propriedades.','As funções inorgânicas incluem óxidos, ácidos, bases e sais. A classificação, nomenclatura e reacções típicas permitem prever produtos em transformações químicas.','HCl + KOH → KCl + H2O é uma neutralização.')
+]),
+CurriculumUnit('V — Soluções',[
+Lesson('11-v-1','Concentração e diluição','Tipos de solução e cálculos.','As soluções podem ser descritas por diferentes formas de concentração. Na diluição, a quantidade de soluto permanece constante: C1V1 = C2V2, para unidades compatíveis.','Uma solução de 2 mol/L diluída de 50 mL para 100 mL passa a 1 mol/L.')
+]),
+CurriculumUnit('VI — Termoquímica',[
+Lesson('11-vi-1','Energia nas reacções','Entalpia e efeito energético.','As reacções podem ser exotérmicas ou endotérmicas. A variação de entalpia representa a energia transferida sob pressão constante.','Uma reacção exotérmica apresenta variação de entalpia negativa.')
+])
+]),
+CurriculumClass('12.ª classe',[
+CurriculumUnit('I — Cinética química',[
+Lesson('12-i-1','Velocidade e mecanismo de reacção','Lei da velocidade e factores.','A cinética estuda a velocidade das reacções, os mecanismos e as leis de velocidade. A concentração e a temperatura podem afectar a rapidez das transformações.','A velocidade média pode ser calculada pela variação de concentração dividida pelo intervalo de tempo.')
+]),
+CurriculumUnit('II — Equilíbrio químico',[
+Lesson('12-ii-1','Equilíbrio e constante','Equilíbrio dinâmico e Kc/Kp.','No equilíbrio dinâmico, as velocidades directa e inversa são iguais. A constante de equilíbrio relaciona as concentrações ou pressões parciais dos participantes, conforme a expressão aplicável.','Para aA + bB ⇌ cC, Kc = [C]^c / ([A]^a[B]^b), omitindo sólidos e líquidos puros.')
+]),
+CurriculumUnit('III — Equilíbrio químico em solução aquosa',[
+Lesson('12-iii-1','Ácidos, bases e pH','Brønsted-Lowry, Ka, Kb, Kw e tampões.','A teoria de Brønsted-Lowry define ácido como dador de protões e base como aceitador. O estudo inclui Ka, Kb, Kw, pH, pOH, soluções tampão, indicadores, solubilidade e titulação.','A 25 °C, pH = −log[H3O+] e pH + pOH = 14, em condições usuais.')
+]),
+CurriculumUnit('IV — Reacções redox e electroquímica',[
+Lesson('12-iv-1','Oxidação-redução','Número de oxidação e semi-equações.','Reacções redox envolvem transferência de electrões e variação dos números de oxidação. O acerto pode usar semi-equações ou variação do número de oxidação.','Numa pilha galvânica, a oxidação ocorre no ânodo e a redução no cátodo.'),
+Lesson('12-iv-2','Células electroquímicas','Pilha, força electromotriz e electrólise.','A electroquímica estuda células galvânicas e electrolíticas. A pilha converte energia química em eléctrica; a electrólise utiliza energia eléctrica para provocar uma reacção não espontânea.','A pilha de Daniell é um exemplo clássico de célula galvânica.')
+]),
+CurriculumUnit('V — Química orgânica',[
+Lesson('12-v-1','Funções orgânicas e biomoléculas','Revisão e aprofundamento.','O estudo inclui hidrocarbonetos, álcoois, fenóis, éteres, aldeídos, cetonas, ácidos carboxílicos, ésteres, aminas, amidas, lípidos, aminoácidos, proteínas, carboidratos e polímeros sintéticos.','As proteínas são macromoléculas formadas por aminoácidos ligados por ligações peptídicas.')
+])
+])
 ];
