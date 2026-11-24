@@ -136,7 +136,18 @@ class _CalculatorsScreenState extends State<CalculatorsScreen>{
   String r0='—',r1='—',r2='—',r3='—',r4='—',r5='—';
   static final weights={for(final e in periodicElements)e.symbol:e.atomicMass};
   void safe(void Function() fn){try{setState(fn);}catch(e){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.toString())));}}
-  void calcMass(){safe(()=>r0=FormulaParser.parse(formula.text).entries.map((e)=>e.value*(weights[e.key]??(throw FormatException('Massa atómica não disponível: ${e.key}')))).fold<double>(0,(a,b)=>a+b).toStringAsFixed(3)+' g/mol');}
+  void calcMass(){
+    safe(() {
+      final atoms=FormulaParser.parse(formula.text);
+      double total=0;
+      atoms.forEach((symbol,count) {
+        final atomicMass=weights[symbol];
+        if(atomicMass==null)throw FormatException('Massa atómica não disponível: $symbol');
+        total+=atomicMass*count;
+      });
+      r0='${total.toStringAsFixed(3)} g/mol';
+    });
+  }
   double val(TextEditingController c)=>double.parse(c.text.replaceAll(',','.'));
   void calcMol()=>safe((){final m=val(mass),mm=val(molar);if(m<0||mm<=0)throw FormatException('A massa deve ser não negativa e a massa molar positiva.');r1=(m/mm).toStringAsFixed(4)+' mol';});
   void calcConc()=>safe((){final n=val(moles),v=val(volume);if(n<0||v<=0)throw FormatException('A quantidade deve ser não negativa e o volume positivo.');r2=(n/v).toStringAsFixed(4)+' mol/L';});
