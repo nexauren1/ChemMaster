@@ -1,51 +1,47 @@
 # ChemMaster
 
-ChemMaster is an Android-first chemistry learning app. The first release is designed around the Mozambique school context, with a data structure intended to expand to other curricula and countries later.
+Aplicação Android-first de aprendizagem de Química. O primeiro mercado é Moçambique; a estrutura de conteúdos foi organizada para permitir acrescentar outros currículos e idiomas no futuro.
 
-## Current prototype
+## Implementado nesta fase
 
-- Portuguese-first interface and dark/light theme.
-- Home, Academy, Tools, Progress and Settings navigation.
-- Learning topic entry screens.
-- Reaction-type reference cards, including neutralization.
-- Equation balancing prototype for simple formulas without parentheses.
-- Molar-mass calculator with an initial element-weight table.
-- Initial periodic-table sample (not yet all 118 elements).
-- Nomenclature examples for oxides, acids, bases and salts.
-- Conceptual neutralization demonstration.
+- Interface Flutter em português, com tema escuro/claro.
+- Navegação Início, Academia, Ferramentas, Progresso e Mais.
+- Conteúdos curriculares iniciais para 7.ª, 8.ª e 9.ª classes, organizados por unidades e lições expansíveis.
+- Lições com resumo, explicação, exemplo e opção para marcar como concluída.
+- Tabela periódica com 118 elementos, pesquisa por nome, símbolo ou número atómico.
+- Parser de fórmulas com grupos entre parênteses.
+- Balanceador de equações por eliminação de Gauss com aritmética racional, com testes de reacções comuns.
+- Calculadoras: massa molar, quantidade de matéria, concentração molar, densidade, percentagem em massa e diluição.
+- Referência de reacções químicas e nomenclatura de óxidos, ácidos, bases e sais.
+- Questionário de escolha múltipla com correcção, explicação e pontuação.
+- Progresso local (lições, respostas e melhores pontuações) através de SharedPreferences.
+- Workflow GitHub Actions para análise, testes e compilação APK Android.
 
-## Important scope notes
+## Base curricular
 
-This is an early source-code foundation, not a finished or store-ready release. Progress persistence, a complete curriculum, all 118 elements, advanced formula parsing, robust equation balancing, full calculator suite, downloadable lesson packs, and real content synchronization still need implementation and tests. The virtual lab is an educational simulation, not a physical experiment.
+A organização inicial do primeiro ciclo segue o documento do INDE/MEC, Programa de Ensino da Disciplina de Química — Ensino Secundário, 1.º Ciclo. O programa organiza os conteúdos da 7.ª, 8.ª e 9.ª classes em unidades temáticas.
 
-Content for each class must be checked against current official Mozambican curriculum documents before being labelled as official curriculum coverage.
+Fonte consultada: https://ieda.gov.mz/site/wp-content/uploads/2020/10/ANEXO_X_PROGRAMA_QUIMICA_ES_I_CICLO_GM_11_02_26_assinado.pdf
 
-## Technical direction
+A cobertura de 10.ª, 11.ª e 12.ª classes não está declarada como currículo oficial nesta versão. Será adicionada após consulta e validação dos respectivos programas do segundo ciclo. Os textos explicativos e exemplos incluídos na app são materiais didácticos redigidos para apoiar os tópicos curriculares, não transcrições integrais do documento oficial.
 
-- Flutter / Dart, Android first.
-- Offline-first content model: local content is the source available to the learner; remote content packs can be added later.
-- Keep chemistry rules and content data separate from UI as the project grows.
-- Add automated tests for chemical calculations and content validation.
+## Limitações científicas a validar antes de publicação
 
-## Run locally
+- O balanceador é um motor algébrico geral para equações moleculares simples; não é ainda um solucionador especializado de reacções iónicas, redox em meio ácido/básico ou equações com electrões e cargas explícitas.
+- O parser reconhece elementos e parênteses; fórmulas com hidratos, cargas iónicas e notação isotópica ainda não são suportadas.
+- Massas de elementos radioactivos sem isótopos estáveis são valores de número de massa de isótopos representativos, não pesos atómicos padrão.
+- O banco de exercícios é inicial e necessita de revisão por professores de Química moçambicanos e ampliação por unidade.
+- O progresso fica guardado no dispositivo; não existe sincronização de conta/nuvem nesta versão.
 
-Install Flutter, then run:
+## Desenvolvimento
+
+Requer Flutter stable e Dart compatível com o SDK definido em `pubspec.yaml`.
 
 ```bash
 flutter pub get
 flutter analyze
 flutter test
-flutter run
-```
-
-To create an Android APK after validation:
-
-```bash
 flutter build apk --release
 ```
 
-## References
-
-- Flutter app architecture: https://docs.flutter.dev/app-architecture
-- Flutter offline-first pattern: https://docs.flutter.dev/app-architecture/design-patterns/offline-first
-- Mozambique, INDE, Chemistry programme for 8th and 9th classes (2022): https://biblioteca.eso.edu.mz/bitstreams/cfe0d670-dd99-443b-ba2a-093aaa054273/download
+O workflow Android executa estes passos automaticamente em cada push para `main` e publica o APK como artefacto da execução quando a compilação passa.
