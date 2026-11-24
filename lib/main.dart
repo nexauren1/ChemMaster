@@ -65,7 +65,7 @@ class QuickCard extends StatelessWidget {
 class InfoTile extends StatelessWidget {
   final IconData icon; final String title, subtitle; final Color color;
   const InfoTile({super.key, required this.icon, required this.title, required this.subtitle, required this.color});
-  @override Widget build(BuildContext context) => Card(child: ListTile(leading: CircleAvatar(backgroundColor: color.withValues(alpha: .15), child: Icon(icon, color: color)), title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)), subtitle: Text(subtitle), trailing: const Icon(Icons.chevron_right)));
+  @override Widget build(BuildContext context) => Card(child: ListTile(leading: CircleAvatar(backgroundColor: color.withOpacity(0.15), child: Icon(icon, color: color)), title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)), subtitle: Text(subtitle), trailing: const Icon(Icons.chevron_right)));
 }
 
 class AcademyPage extends StatelessWidget {
