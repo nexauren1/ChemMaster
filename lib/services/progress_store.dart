@@ -21,6 +21,10 @@ class ProgressStore {
     answers[id]={'score':score,'total':total,'date':DateTime.now().toIso8601String()};
     data['answers']=answers; await _write(data);
   }
+  static Future<void> clear() async {
+    final prefs=await SharedPreferences.getInstance();
+    await prefs.remove(_key);
+  }
   static Future<void> _write(Map<String,dynamic> data) async {
     final prefs=await SharedPreferences.getInstance();
     await prefs.setString(_key,jsonEncode(data));
