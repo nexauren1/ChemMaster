@@ -4,6 +4,8 @@ import 'package:chemmaster/chemistry/formula_parser.dart';
 import 'package:chemmaster/data/periodic_elements.dart';
 import 'package:chemmaster/data/curriculum.dart';
 import 'package:chemmaster/data/quiz_bank.dart';
+import 'package:chemmaster/services/progress_store.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('Formula parser', () {
@@ -40,6 +42,15 @@ void main() {
   });
   test('curriculum contains the three first-cycle grades', () {
     expect(mozambiqueCurriculum.map((c) => c.grade).toList(), ['7.ª classe', '8.ª classe', '9.ª classe']);
+  });
+  test('local progress persists completed lessons and quiz scores', () async {
+    SharedPreferences.setMockInitialValues({});
+    await ProgressStore.completeLesson('lesson-a');
+    await ProgressStore.saveQuiz('quiz-7', 4, 5);
+    final data = await ProgressStore.read();
+    expect(data['lessons'], contains('lesson-a'));
+    expect((data['bestScores'] as Map<String, dynamic>)['quiz-7'], 4);
+    expect((data['answers'] as Map<String, dynamic>)['quiz-7']['total'], 5);
   });
   test('quiz bank contains real questions', () {
     expect(quizBank.length, greaterThanOrEqualTo(10));
