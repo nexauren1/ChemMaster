@@ -80,7 +80,7 @@ Lesson('9-v-1','Cadeias carbónicas','Tipos de cadeia e fórmulas.','A Química 
 CurriculumUnit('VI — Hidrocarbonetos',[
 Lesson('9-vi-1','Alcanos, alcenos e alcinos','Hidrocarbonetos e petróleo.','Hidrocarbonetos contêm carbono e hidrogénio. Alcanos têm ligações simples; alcenos têm pelo menos uma ligação dupla; alcinos têm pelo menos uma ligação tripla.','Etano: C2H6; eteno: C2H4; etino: C2H2.')
 ])
-])
+]),
 
 CurriculumClass('10.ª classe',[
 CurriculumUnit('I — Fundamentos de Química',[
