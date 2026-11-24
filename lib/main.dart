@@ -251,7 +251,7 @@ class _ProgressScreenState extends State<ProgressScreen>{
     const Text('Melhores resultados',style:TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
     ...scores.entries.map((e)=>ListTile(title:Text(e.key),trailing:Text('${e.value} pontos'))),
     if(lessons.isEmpty&&scores.isEmpty)const Text('Ainda não há progresso guardado. Conclui uma lição ou faz uma avaliação.')
-  ];}));
+  ]); }));
   }
 }
 class SettingsScreen extends StatelessWidget {
