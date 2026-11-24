@@ -75,7 +75,7 @@ class EquationBalancer {
     search(0,[]);
     final coeff=solution;
     if(coeff==null) throw FormatException('Não foi encontrada solução inteira positiva. Verifica as fórmulas e o estado físico indicado.');
-    String side(List<String> fs,int offset)=>List.generate(fs.length,(i)=>(coeff![offset+i]==1?'':coeff[offset+i].toString())+fs[i]).join(' + ');
+    String side(List<String> fs,int offset)=>List.generate(fs.length,(i)=>(coeff[offset+i]==1?'':coeff[offset+i].toString())+fs[i]).join(' + ');
     return side(left,0)+' → '+side(right,left.length);
   }
 }
