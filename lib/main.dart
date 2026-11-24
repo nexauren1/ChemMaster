@@ -119,7 +119,7 @@ class _ToolTile extends StatelessWidget {
 class BalanceScreen extends StatefulWidget {const BalanceScreen({super.key});@override State<BalanceScreen> createState()=>_BalanceScreenState();}
 class _BalanceScreenState extends State<BalanceScreen>{
   final input=TextEditingController(text:'HCl + KOH -> KCl + H2O');String result='',error='';
-  void solve(){try{final value=EquationBalancer.balance(input.text);setState(()=>{result=value,error=''});}catch(e){setState(()=>{result='',error=e.toString()});}}
+  void solve(){try{final value=EquationBalancer.balance(input.text);setState(() { result=value; error=''; });}catch(e){setState(() { result=''; error=e.toString(); });}}
   @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Balancear equações')),body:ListView(padding:const EdgeInsets.all(18),children:[
     const Text('Escreve a equação sem alterar os índices das fórmulas.',style:TextStyle(fontSize:16)),
     const SizedBox(height:12),TextField(controller:input,decoration:const InputDecoration(border:OutlineInputBorder(),labelText:'Ex.: H2 + O2 -> H2O')),
