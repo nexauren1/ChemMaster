@@ -139,11 +139,10 @@ class _CalculatorsScreenState extends State<CalculatorsScreen>{
   void calcMass(){
     safe(() {
       final atoms=FormulaParser.parse(formula.text);
-      double total=0;
-      atoms.forEach((symbol,count) {
-        final atomicMass=weights[symbol];
-        if(atomicMass==null)throw FormatException('Massa atómica não disponível: $symbol');
-        total+=atomicMass*count;
+      final total=atoms.entries.fold<double>(0.0,(sum,entry) {
+        final atomicMass=weights[entry.key];
+        if(atomicMass==null)throw FormatException('Massa atómica não disponível: ${entry.key}');
+        return (sum+atomicMass*entry.value).toDouble();
       });
       r0='${total.toStringAsFixed(3)} g/mol';
     });
