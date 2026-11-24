@@ -302,7 +302,6 @@ class _ProgressScreenState extends State<ProgressScreen>{
     ...scores.entries.map((e)=>ListTile(title:Text(e.key),trailing:Text('${e.value} pontos'))),
     if(lessons.isEmpty&&scores.isEmpty)const Text('Ainda não há progresso guardado. Conclui uma lição ou faz uma avaliação.')
   ]); });
-  }
 }
 class SettingsScreen extends StatelessWidget {
   final bool dark;final VoidCallback onTheme;
