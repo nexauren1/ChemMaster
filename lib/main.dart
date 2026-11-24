@@ -133,25 +133,27 @@ class _BalanceScreenState extends State<BalanceScreen>{
 class CalculatorsScreen extends StatefulWidget {const CalculatorsScreen({super.key});@override State<CalculatorsScreen> createState()=>_CalculatorsScreenState();}
 class _CalculatorsScreenState extends State<CalculatorsScreen>{
   final formula=TextEditingController(text:'H2SO4'),mass=TextEditingController(text:'10'),molar=TextEditingController(text:'98.08'),moles=TextEditingController(text:'0.5'),volume=TextEditingController(text:'2'),densityMass=TextEditingController(text:'20'),densityVolume=TextEditingController(text:'5'),solute=TextEditingController(text:'10'),solution=TextEditingController(text:'100'),c1=TextEditingController(text:'2'),v1=TextEditingController(text:'50'),v2=TextEditingController(text:'100');
-  String r0='—',r1='—',r2='—',r3='—',r4='—';
+  String r0='—',r1='—',r2='—',r3='—',r4='—',r5='—';
   static final weights={for(final e in periodicElements)e.symbol:e.atomicMass};
   void safe(void Function() fn){try{setState(fn);}catch(e){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.toString())));}}
   void calcMass(){safe(()=>r0=FormulaParser.parse(formula.text).entries.map((e)=>e.value*(weights[e.key]??(throw FormatException('Massa atómica não disponível: ${e.key}')))).fold<double>(0,(a,b)=>a+b).toStringAsFixed(3)+' g/mol');}
   double val(TextEditingController c)=>double.parse(c.text.replaceAll(',','.'));
-  void calcMol()=>safe(()=>r1=(val(mass)/val(molar)).toStringAsFixed(4)+' mol');
-  void calcConc()=>safe(()=>r2=(val(moles)/val(volume)).toStringAsFixed(4)+' mol/L');
-  void calcDensity()=>safe(()=>r3=(val(densityMass)/val(densityVolume)).toStringAsFixed(4)+' g/mL');
-  void calcPercent()=>safe(()=>r4=(val(solute)/val(solution)*100).toStringAsFixed(2)+' % m/m');
+  void calcMol()=>safe((){final m=val(mass),mm=val(molar);if(m<0||mm<=0)throw FormatException('A massa deve ser não negativa e a massa molar positiva.');r1=(m/mm).toStringAsFixed(4)+' mol';});
+  void calcConc()=>safe((){final n=val(moles),v=val(volume);if(n<0||v<=0)throw FormatException('A quantidade deve ser não negativa e o volume positivo.');r2=(n/v).toStringAsFixed(4)+' mol/L';});
+  void calcDensity()=>safe((){final m=val(densityMass),v=val(densityVolume);if(m<0||v<=0)throw FormatException('A massa deve ser não negativa e o volume positivo.');r3=(m/v).toStringAsFixed(4)+' g/mL';});
+  void calcPercent()=>safe((){final m=val(solute),total=val(solution);if(m<0||total<=0||m>total)throw FormatException('A massa do soluto deve estar entre zero e a massa total da solução.');r4=(m/total*100).toStringAsFixed(2)+' % m/m';});
+  void calcDilution()=>safe((){final initial=val(c1),initialVolume=val(v1),finalVolume=val(v2);if(initial<0||initialVolume<=0||finalVolume<=0||finalVolume<initialVolume)throw FormatException('Verifica as concentrações e os volumes. O volume final deve ser maior ou igual ao inicial.');r5=(initial*initialVolume/finalVolume).toStringAsFixed(4)+' mol/L';});
   InputDecoration dec(String s)=>InputDecoration(labelText:s,border:const OutlineInputBorder());
   Widget field(TextEditingController c,String label)=>TextField(controller:c,keyboardType:const TextInputType.numberWithOptions(decimal:true),decoration:dec(label));
   Widget panel(String title,String formulaText,List<Widget> children)=>ListView(padding:const EdgeInsets.all(16),children:[Text(title,style:const TextStyle(fontSize:18,fontWeight:FontWeight.bold)),Text(formulaText,style:const TextStyle(color:cyan)),const SizedBox(height:12),...children]);
   Widget result(String s)=>Card(child:Padding(padding:const EdgeInsets.all(16),child:Text(s,style:const TextStyle(fontSize:23,fontWeight:FontWeight.bold,color:cyan))));
-  @override Widget build(BuildContext context)=>DefaultTabController(length:5,child:Scaffold(appBar:AppBar(title:const Text('Calculadoras químicas'),bottom:const TabBar(isScrollable:true,tabs:[Tab(text:'Massa molar'),Tab(text:'Mol'),Tab(text:'Concentração'),Tab(text:'Densidade'),Tab(text:'Percentagem')])),body:TabBarView(children:[
+  @override Widget build(BuildContext context)=>DefaultTabController(length:6,child:Scaffold(appBar:AppBar(title:const Text('Calculadoras químicas'),bottom:const TabBar(isScrollable:true,tabs:[Tab(text:'Massa molar'),Tab(text:'Mol'),Tab(text:'Concentração'),Tab(text:'Densidade'),Tab(text:'Percentagem'),Tab(text:'Diluição')])),body:TabBarView(children:[
     panel('Massa molar','M = soma das massas atómicas', [field(formula,'Fórmula química'),FilledButton(onPressed:calcMass,child:const Text('Calcular')),result(r0)]),
     panel('Quantidade de matéria','n = m / M', [field(mass,'Massa (g)'),field(molar,'Massa molar (g/mol)'),FilledButton(onPressed:calcMol,child:const Text('Calcular')),result(r1)]),
     panel('Concentração molar','C = n / V', [field(moles,'Quantidade (mol)'),field(volume,'Volume (L)'),FilledButton(onPressed:calcConc,child:const Text('Calcular')),result(r2)]),
     panel('Densidade','d = m / V', [field(densityMass,'Massa (g)'),field(densityVolume,'Volume (mL)'),FilledButton(onPressed:calcDensity,child:const Text('Calcular')),result(r3)]),
-    panel('Concentração percentual em massa','% m/m = massa do soluto / massa da solução × 100', [field(solute,'Massa do soluto (g)'),field(solution,'Massa da solução (g)'),FilledButton(onPressed:calcPercent,child:const Text('Calcular')),result(r4)])
+    panel('Concentração percentual em massa','% m/m = massa do soluto / massa da solução × 100', [field(solute,'Massa do soluto (g)'),field(solution,'Massa da solução (g)'),FilledButton(onPressed:calcPercent,child:const Text('Calcular')),result(r4)]),
+    panel('Diluição','C1 × V1 = C2 × V2', [field(c1,'Concentração inicial (mol/L)'),field(v1,'Volume inicial (mL)'),field(v2,'Volume final (mL)'),FilledButton(onPressed:calcDilution,child:const Text('Calcular concentração final')),result(r5)])
   ])));
 }
 
