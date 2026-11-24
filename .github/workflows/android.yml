@@ -29,6 +29,30 @@ jobs:
         run: flutter test
       - name: Build release APK
         run: flutter build apk --release
+
+      - name: Sign APK for Android installation
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="build/app/outputs/flutter-apk/app-release.apk"
+          KEYSTORE="$RUNNER_TEMP/chemmaster-test-signing.jks"
+          keytool -genkeypair -noprompt \
+            -keystore "$KEYSTORE" \
+            -storepass android -keypass android \
+            -alias chemmaster-test \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=ChemMaster Test, OU=Android, O=Nexauren, L=Maputo, ST=Maputo, C=MZ"
+          BUILD_TOOLS="$(ls -1 "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)"
+          APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner"
+          "$APKSIGNER" sign \
+            --ks "$KEYSTORE" \
+            --ks-key-alias chemmaster-test \
+            --ks-pass pass:android \
+            --key-pass pass:android \
+            --out "$RUNNER_TEMP/app-release-signed.apk" \
+            "$APK"
+          "$APKSIGNER" verify --verbose --print-certs "$RUNNER_TEMP/app-release-signed.apk"
+          mv "$RUNNER_TEMP/app-release-signed.apk" "$APK"
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
