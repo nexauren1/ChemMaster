@@ -5,6 +5,7 @@ import 'package:chemmaster/chemistry/equation_analysis.dart';
 import 'package:chemmaster/chemistry/formula_parser.dart';
 import 'package:chemmaster/chemistry/reaction_predictor.dart';
 import 'package:chemmaster/data/chemical_catalog.dart';
+import 'package:chemmaster/data/chemistry_glossary.dart';
 import 'package:chemmaster/data/reaction_localization.dart';
 
 void main() {
@@ -31,6 +32,21 @@ void main() {
     });
   });
 
+
+
+  group('Chemistry glossary', () {
+    test('contains useful bilingual chemistry learning terms', () {
+      expect(chemistryGlossary.length, greaterThanOrEqualTo(30));
+      expect(chemistryGlossary.any((term) => term.id == 'coefficient'), isTrue);
+      expect(chemistryGlossary.any((term) => term.id == 'isotope'), isTrue);
+      expect(chemistryGlossary.any((term) => term.id == 'mole'), isTrue);
+      expect(chemistryGlossary.every((term) =>
+        term.termPt.isNotEmpty &&
+        term.termEn.isNotEmpty &&
+        term.definitionPt.isNotEmpty &&
+        term.definitionEn.isNotEmpty), isTrue);
+    });
+  });
 
   group('Chemical catalog', () {
     test('contains all 118 elements and separates compound entries', () {
