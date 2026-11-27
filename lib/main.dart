@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/chem_language.dart';
-import 'data/chemical_catalog.dart';
 import 'widgets/chemical_picker.dart';
 import 'screens/reaction_workbench.dart';
-import 'chemistry/equation_balancer.dart';
 import 'screens/advanced_chemistry_screens.dart';
 import 'chemistry/formula_parser.dart';
 import 'data/curriculum.dart';
@@ -89,7 +87,7 @@ class _AppShellState extends State<AppShell> {
   int tab=0;
   @override Widget build(BuildContext context)=>Scaffold(
     body:SafeArea(child:IndexedStack(index:tab,children:[
-      HomeScreen(onTab:(v)=>setState(()=>tab=v)),
+      const HomeScreen(),
       const AcademyScreen(),const ToolsScreen(),const ProgressScreen(),
       SettingsScreen(
         dark:widget.dark,
@@ -110,8 +108,7 @@ class _AppShellState extends State<AppShell> {
     ));
 }
 class HomeScreen extends StatelessWidget {
-  final ValueChanged<int> onTab;
-  const HomeScreen({super.key,required this.onTab});
+  const HomeScreen({super.key});
   @override
   Widget build(BuildContext context) {
     final english = isEnglish(context);
