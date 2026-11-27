@@ -32,7 +32,7 @@ class EquationAnalysis {
       }
 
       for (final term in terms) {
-        final match = RegExp(r'^\s*([0-9]+)?\s*(.+?)\s*.firstMatch(term);
+        final match = RegExp(r'^\s*([0-9]+)?\s*(.+?)\s*$').firstMatch(term);
         if (match == null) {
           throw FormatException('Não foi possível interpretar: $term');
         }
