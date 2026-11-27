@@ -393,7 +393,7 @@ class _CalculatorsScreenState extends State<CalculatorsScreen>{
     style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
   );
   static final weights={for(final e in periodicElements)e.symbol:e.atomicMass};
-  void safe(void Function() fn){try{setState(fn);}catch(e){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.toString())));}}
+  void safe(void Function() fn){try{setState(fn);}catch(e){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(_english?'Check the values and selected formula, then try again.':e.toString())));}}
   void calcMass(){
     safe(() {
       final atoms=FormulaParser.parse(formula.text);
