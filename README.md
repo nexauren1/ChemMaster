@@ -9,7 +9,12 @@ Aplicação Android-first de aprendizagem de Química. O primeiro mercado é Mo�
 - Conteúdos curriculares iniciais para 7.ª a 12.ª classes, organizados por ciclos, classes, unidades e lições expansíveis.
 - Lições com resumo, explicação, exemplo e opção para marcar como concluída.
 - Tabela periódica com 118 elementos, pesquisa por nome, símbolo ou número atómico.
-- Parser de fórmulas com grupos entre parênteses.
+- Parser de fórmulas tolerante a minúsculas, espaços e índices Unicode, com grupos entre parênteses.
+- Descoberta offline de produtos para reacções escolares conhecidas, com equação balanceada, tipo de reacção e explicação passo a passo.
+- Exemplos de neutralização, síntese, combustão, precipitação, reacções de ácidos com carbonatos e saponificação (sabão).
+- Calculadora de estrutura atómica: Z, A, número de neutrões, protões e electrões, com selecção do isótopo.
+- Distribuição electrónica por subníveis e camadas para os 118 elementos, com indicação de resultados aproximados em elementos pesados.
+- Testes automatizados para fórmulas com escrita flexível, balanceamento, descoberta de produtos e distribuição electrónica.
 - Balanceador de equações por eliminação de Gauss com aritmética racional, com testes de reacções comuns.
 - Calculadoras: massa molar, quantidade de matéria, concentração molar, densidade, percentagem em massa e diluição.
 - Referência de reacções químicas e nomenclatura de óxidos, ácidos, bases e sais.
@@ -28,7 +33,11 @@ A estrutura cobre as seis classes do ensino secundário. As lições são resumo
 ## Limitações científicas a validar antes de publicação
 
 - O balanceador é um motor algébrico geral para equações moleculares simples; não é ainda um solucionador especializado de reacções iónicas, redox em meio ácido/básico ou equações com electrões e cargas explícitas.
-- O parser reconhece elementos e parênteses; fórmulas com hidratos, cargas iónicas e notação isotópica ainda não são suportadas.
+- O parser reconhece elementos, minúsculas, espaços, índices Unicode e parênteses; fórmulas com hidratos, cargas iónicas e notação isotópica ainda não são suportadas.
+- A descoberta de produtos usa uma base offline de reacções conhecidas. Não prevê qualquer combinação arbitrária de elementos: condições como temperatura, concentração, solvente, pressão e catalisador podem alterar os produtos.
+- A saponificação é apresentada como equação geral, porque os óleos e gorduras contêm misturas variáveis de triglicéridos. A explicação é teórica; não é uma receita laboratorial.
+- O número de neutrões depende do isótopo escolhido (A); a massa atómica média da tabela periódica não substitui o número de massa de um isótopo específico.
+- A distribuição electrónica usa a regra de preenchimento e excepções comuns; para alguns elementos pesados, o resultado é assinalado como aproximado e deve ser confirmado em fontes especializadas.
 - Massas de elementos radioactivos sem isótopos estáveis são valores de número de massa de isótopos representativos, não pesos atómicos padrão.
 - O banco de exercícios é inicial e necessita de revisão por professores de Química moçambicanos e ampliação por unidade.
 - O progresso fica guardado no dispositivo; não existe sincronização de conta/nuvem nesta versão.
