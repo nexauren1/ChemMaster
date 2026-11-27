@@ -8,6 +8,7 @@ import 'screens/glossary_screen.dart';
 import 'screens/advanced_chemistry_screens.dart';
 import 'chemistry/formula_parser.dart';
 import 'data/curriculum.dart';
+import 'data/chemical_catalog.dart';
 import 'data/periodic_elements.dart';
 import 'data/quiz_bank.dart';
 import 'data/curriculum_localization.dart';
