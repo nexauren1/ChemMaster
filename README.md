@@ -13,7 +13,7 @@ The former generic tools list is organised as a Chemistry Lab, grouped by the ta
 - **Reactions & equations:** discover known products from selected reactants; build both sides of an equation; balance it; explore reaction types.
 - **Elements & atoms:** periodic table, atomic structure (Z, A, N, protons and electrons), and electron configuration.
 - **Calculations & solutions:** molar mass, amount of substance, molar concentration, density, mass percentage and dilution.
-- **Learn & practise:** nomenclature, curriculum lessons, worked examples and multiple-choice exercises with explanations.
+- **Learn & practise:** searchable bilingual glossary, nomenclature, curriculum lessons, worked examples and multiple-choice exercises with explanations.
 
 ### Shared visual chemical catalogue
 
