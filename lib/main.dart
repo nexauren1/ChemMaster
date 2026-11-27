@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/chem_language.dart';
 import 'widgets/chemical_picker.dart';
@@ -53,6 +54,11 @@ class _ChemMasterAppState extends State<ChemMasterApp> {
 
   @override Widget build(BuildContext context)=>MaterialApp(
     locale:Locale(language),
+    localizationsDelegates:const [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
     supportedLocales:const [Locale('pt'),Locale('en')],
     debugShowCheckedModeBanner:false,title:'ChemMaster',
     theme:ThemeData(
