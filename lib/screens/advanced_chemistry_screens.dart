@@ -270,9 +270,11 @@ class _AtomicStructureScreenState extends State<AtomicStructureScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mass = int.tryParse(_massNumber.text.trim());
-    final valid = mass != null && mass >= _selected.number;
-    final neutrons = valid ? mass - _selected.number : null;
+    final parsedMass = int.tryParse(_massNumber.text.trim());
+    final validMass = parsedMass != null && parsedMass >= _selected.number
+        ? parsedMass
+        : null;
+    final neutrons = validMass == null ? 0 : validMass - _selected.number;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Estrutura atómica')),
@@ -303,18 +305,18 @@ class _AtomicStructureScreenState extends State<AtomicStructureScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          if (!valid)
+          if (validMass == null)
             const Text(
               'O número de massa A tem de ser um número inteiro igual ou superior ao número atómico Z.',
               style: TextStyle(color: Colors.orange),
             ),
-          if (valid) ...[
+          if (validMass != null) ...[
             Wrap(
               spacing: 9,
               runSpacing: 9,
               children: [
                 _NumberCard(label: 'Z • número atómico', value: _selected.number.toString(), icon: Icons.bubble_chart),
-                _NumberCard(label: 'A • número de massa', value: mass.toString(), icon: Icons.scale),
+                _NumberCard(label: 'A • número de massa', value: validMass.toString(), icon: Icons.scale),
                 _NumberCard(label: 'N • neutrões', value: neutrons.toString(), icon: Icons.grain),
                 _NumberCard(label: 'Protões', value: _selected.number.toString(), icon: Icons.add_circle_outline),
                 _NumberCard(label: 'Electrões', value: _selected.number.toString(), icon: Icons.electric_bolt),
@@ -323,7 +325,7 @@ class _AtomicStructureScreenState extends State<AtomicStructureScreen> {
             const SizedBox(height: 15),
             _InfoPanel(
               title: 'Como se calcula?',
-              body: 'Z é o número de protões. A é a soma de protões e neutrões. Portanto, N = A − Z = ' + mass.toString() + ' − ' + _selected.number.toString() + ' = ' + neutrons.toString() + '. Como estamos a considerar um átomo neutro, o número de electrões é igual a Z.',
+              body: 'Z é o número de protões. A é a soma de protões e neutrões. Portanto, N = A − Z = ' + validMass.toString() + ' − ' + _selected.number.toString() + ' = ' + neutrons.toString() + '. Como estamos a considerar um átomo neutro, o número de electrões é igual a Z.',
             ),
           ],
           const SizedBox(height: 12),
