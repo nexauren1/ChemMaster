@@ -11,6 +11,10 @@ void main() {
       expect(FormulaParser.parse('CO2'), {'C': 1, 'O': 2});
       expect(FormulaParser.parse('naoh'), {'Na': 1, 'O': 1, 'H': 1});
       expect(FormulaParser.parse('ca(oh)2'), {'Ca': 1, 'O': 2, 'H': 2});
+      expect(FormulaParser.parse('sio2'), {'Si': 1, 'O': 2});
+      expect(FormulaParser.parse('no2'), {'N': 1, 'O': 2});
+      expect(FormulaParser.parse('po4'), {'P': 1, 'O': 4});
+      expect(FormulaParser.parse('cocl2'), {'Co': 1, 'Cl': 2});
     });
 
     test('accepts subscript characters and spaces', () {
