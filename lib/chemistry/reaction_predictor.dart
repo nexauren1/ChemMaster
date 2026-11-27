@@ -259,7 +259,7 @@ class ReactionPredictor {
       ],
     ),
     _ReactionRule(
-      reactants: ['Fe', 'S'],
+      reactants: ['Fe', 'S8'],
       products: ['FeS'],
       title: 'Formação do sulfureto de ferro',
       type: 'Síntese',
@@ -267,7 +267,7 @@ class ReactionPredictor {
       explanation: [
         'O ferro e o enxofre combinam-se numa proporção 1:1.',
         'O composto formado é FeS.',
-        'A equação Fe + S → FeS conserva um átomo de cada elemento.',
+        'A equação ajustada é 8Fe + S₈ → 8FeS, conservando ferro e enxofre.'
       ],
     ),
     _ReactionRule(
