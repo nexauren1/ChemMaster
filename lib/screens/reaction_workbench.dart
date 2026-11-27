@@ -79,7 +79,9 @@ class _EquationBuilderScreenState extends State<EquationBuilderScreen> {
     } catch (error) {
       setState(() {
         _equation = null;
-        _error = error.toString().replaceFirst('FormatException: ', '');
+        _error = _english
+            ? 'The selected substances could not be balanced with the current equation rules. Check both sides and try a different combination.'
+            : error.toString().replaceFirst('FormatException: ', '');
       });
     }
   }
