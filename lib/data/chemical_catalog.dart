@@ -159,6 +159,23 @@ const List<ChemicalSpecies> commonSubstances = [
   ChemicalSpecies(id:'ethanol',formula:'C2H6O',namePt:'Etanol',nameEn:'Ethanol',detailPt:'Álcool',detailEn:'Alcohol',group:ChemicalGroup.organicCompounds),
   ChemicalSpecies(id:'glucose',formula:'C6H12O6',namePt:'Glicose',nameEn:'Glucose',detailPt:'Glícido simples',detailEn:'Simple carbohydrate',group:ChemicalGroup.organicCompounds),
   ChemicalSpecies(id:'glycerol',formula:'C3H8O3',namePt:'Glicerol (glicerina)',nameEn:'Glycerol (glycerin)',detailPt:'Álcool • produto da saponificação',detailEn:'Alcohol • product of saponification',group:ChemicalGroup.organicCompounds),
+
+  ChemicalSpecies(id:'ammonium-chloride',formula:'NH4Cl',namePt:'Cloreto de amónio',nameEn:'Ammonium chloride',detailPt:'Sal',detailEn:'Salt',group:ChemicalGroup.salts),
+  ChemicalSpecies(id:'zinc-chloride',formula:'ZnCl2',namePt:'Cloreto de zinco',nameEn:'Zinc chloride',detailPt:'Sal',detailEn:'Salt',group:ChemicalGroup.salts),
+  ChemicalSpecies(id:'aluminium-chloride',formula:'AlCl3',namePt:'Cloreto de alumínio',nameEn:'Aluminium chloride',detailPt:'Sal',detailEn:'Salt',group:ChemicalGroup.salts),
+  ChemicalSpecies(id:'iron-ii-chloride',formula:'FeCl2',namePt:'Cloreto de ferro (II)',nameEn:'Iron(II) chloride',detailPt:'Sal',detailEn:'Salt',group:ChemicalGroup.salts),
+  ChemicalSpecies(id:'magnesium-chloride',formula:'MgCl2',namePt:'Cloreto de magnésio',nameEn:'Magnesium chloride',detailPt:'Sal',detailEn:'Salt',group:ChemicalGroup.salts),
+  ChemicalSpecies(id:'potassium-sulfate',formula:'K2SO4',namePt:'Sulfato de potássio',nameEn:'Potassium sulfate',detailPt:'Sal',detailEn:'Salt',group:ChemicalGroup.salts),
+  ChemicalSpecies(id:'sodium-phosphate',formula:'Na3PO4',namePt:'Fosfato de sódio',nameEn:'Sodium phosphate',detailPt:'Sal',detailEn:'Salt',group:ChemicalGroup.salts),
+  ChemicalSpecies(id:'zinc-oxide',formula:'ZnO',namePt:'Óxido de zinco',nameEn:'Zinc oxide',detailPt:'Óxido metálico',detailEn:'Metal oxide',group:ChemicalGroup.oxides),
+  ChemicalSpecies(id:'potassium-oxide',formula:'K2O',namePt:'Óxido de potássio',nameEn:'Potassium oxide',detailPt:'Óxido metálico',detailEn:'Metal oxide',group:ChemicalGroup.oxides),
+  ChemicalSpecies(id:'dinitrogen-pentoxide',formula:'N2O5',namePt:'Pentóxido de dinitrogénio',nameEn:'Dinitrogen pentoxide',detailPt:'Óxido não metálico',detailEn:'Non-metal oxide',group:ChemicalGroup.oxides),
+  ChemicalSpecies(id:'diphosphorus-pentoxide',formula:'P2O5',namePt:'Pentóxido de difósforo',nameEn:'Diphosphorus pentoxide',detailPt:'Óxido não metálico',detailEn:'Non-metal oxide',group:ChemicalGroup.oxides),
+  ChemicalSpecies(id:'hydrogen-sulfide',formula:'H2S',namePt:'Sulfureto de hidrogénio',nameEn:'Hydrogen sulfide',detailPt:'Composto molecular',detailEn:'Molecular compound',group:ChemicalGroup.otherCompounds),
+  ChemicalSpecies(id:'nitrogen-dioxide',formula:'NO2',namePt:'Dióxido de azoto',nameEn:'Nitrogen dioxide',detailPt:'Óxido não metálico',detailEn:'Non-metal oxide',group:ChemicalGroup.oxides),
+  ChemicalSpecies(id:'nitric-oxide',formula:'NO',namePt:'Monóxido de azoto',nameEn:'Nitric oxide',detailPt:'Óxido não metálico',detailEn:'Non-metal oxide',group:ChemicalGroup.oxides),
+  ChemicalSpecies(id:'calcium-phosphate',formula:'Ca3(PO4)2',namePt:'Fosfato de cálcio',nameEn:'Calcium phosphate',detailPt:'Sal',detailEn:'Salt',group:ChemicalGroup.salts),
+  ChemicalSpecies(id:'sodium-acetate',formula:'C2H3NaO2',namePt:'Acetato de sódio',nameEn:'Sodium acetate',detailPt:'Sal orgânico',detailEn:'Organic salt',group:ChemicalGroup.salts),
 ];
 
 final List<ChemicalSpecies> chemicalCatalog = [
