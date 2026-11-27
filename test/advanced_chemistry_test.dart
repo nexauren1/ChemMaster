@@ -3,6 +3,8 @@ import 'package:chemmaster/chemistry/electron_configuration.dart';
 import 'package:chemmaster/chemistry/equation_balancer.dart';
 import 'package:chemmaster/chemistry/formula_parser.dart';
 import 'package:chemmaster/chemistry/reaction_predictor.dart';
+import 'package:chemmaster/data/chemical_catalog.dart';
+import 'package:chemmaster/data/reaction_localization.dart';
 
 void main() {
   group('FormulaParser', () {
@@ -15,6 +17,7 @@ void main() {
       expect(FormulaParser.parse('no2'), {'N': 1, 'O': 2});
       expect(FormulaParser.parse('po4'), {'P': 1, 'O': 4});
       expect(FormulaParser.parse('cocl2'), {'Co': 1, 'Cl': 2});
+      expect(FormulaParser.parse('nh3'), {'N': 1, 'H': 3});
     });
 
     test('accepts subscript characters and spaces', () {
@@ -24,6 +27,25 @@ void main() {
     test('preserves correct mixed-case element symbols', () {
       expect(FormulaParser.parse('Co2'), {'Co': 2});
       expect(FormulaParser.parse('Ca(OH)2'), {'Ca': 1, 'O': 2, 'H': 2});
+    });
+  });
+
+
+  group('Chemical catalog', () {
+    test('contains all 118 elements and separates compound entries', () {
+      expect(periodicSpecies.length, 118);
+      expect(periodicSpecies.every((item) => item.isElement), isTrue);
+      expect(commonSubstances.every((item) => !item.isElement), isTrue);
+      expect(chemicalCatalog.length, periodicSpecies.length + commonSubstances.length);
+    });
+
+    test('uses molecular forms for common elemental reactants', () {
+      final sulfur = periodicSpecies.firstWhere((item) => item.elementSymbol == 'S');
+      final phosphorus = periodicSpecies.firstWhere((item) => item.elementSymbol == 'P');
+      final oxygen = periodicSpecies.firstWhere((item) => item.elementSymbol == 'O');
+      expect(formulaForReaction(sulfur), 'S8');
+      expect(formulaForReaction(phosphorus), 'P4');
+      expect(formulaForReaction(oxygen), 'O2');
     });
   });
 
@@ -67,6 +89,30 @@ void main() {
       expect(result!.isGeneralReaction, isTrue);
       expect(result.equation, contains('RCOONa'));
       expect(result.note, contains('corrosivos'));
+    });
+
+
+    test('recognizes elemental sulfur in its molecular form', () {
+      final result = ReactionPredictor.predict('fe + s8');
+      expect(result, isNotNull);
+      expect(result!.equation, '8Fe + S8 → 8FeS');
+    });
+
+    test('discovers common decomposition and combustion examples', () {
+      final decomposition = ReactionPredictor.predict('h2o2');
+      expect(decomposition, isNotNull);
+      expect(decomposition!.equation, '2H2O2 → 2H2O + O2');
+
+      final propane = ReactionPredictor.predict('c3h8 + o2');
+      expect(propane, isNotNull);
+      expect(propane!.equation, 'C3H8 + 5O2 → 3CO2 + 4H2O');
+    });
+
+    test('reaction result can be presented in English', () {
+      final result = ReactionPredictor.predict('co2 + h2o')!;
+      final english = localizedReactionText(result, true);
+      expect(english.title, 'Formation of carbonic acid');
+      expect(english.explanations, isNotEmpty);
     });
 
     test('does not invent products for an unknown combination', () {
