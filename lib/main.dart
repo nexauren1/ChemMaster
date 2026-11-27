@@ -70,8 +70,17 @@ class _ChemMasterAppState extends State<ChemMasterApp> {
     home:AppShell(dark:dark,language:language,onTheme:()=>setState(()=>dark=!dark),onLanguage:changeLanguage));
 }
 class AppShell extends StatefulWidget {
-  final bool dark; final VoidCallback onTheme;
-  const AppShell({super.key,required this.dark,required this.onTheme});
+  final bool dark;
+  final String language;
+  final VoidCallback onTheme;
+  final ValueChanged<String> onLanguage;
+  const AppShell({
+    super.key,
+    required this.dark,
+    required this.language,
+    required this.onTheme,
+    required this.onLanguage,
+  });
   @override State<AppShell> createState()=>_AppShellState();
 }
 class _AppShellState extends State<AppShell> {
@@ -80,33 +89,94 @@ class _AppShellState extends State<AppShell> {
     body:SafeArea(child:IndexedStack(index:tab,children:[
       HomeScreen(onTab:(v)=>setState(()=>tab=v)),
       const AcademyScreen(),const ToolsScreen(),const ProgressScreen(),
-      SettingsScreen(dark:widget.dark,onTheme:widget.onTheme)])),
-    bottomNavigationBar:NavigationBar(selectedIndex:tab,onDestinationSelected:(v)=>setState(()=>tab=v),destinations:const[
-      NavigationDestination(icon:Icon(Icons.home_outlined),label:'Início'),
-      NavigationDestination(icon:Icon(Icons.menu_book_outlined),label:'Academia'),
-      NavigationDestination(icon:Icon(Icons.science_outlined),label:'Ferramentas'),
-      NavigationDestination(icon:Icon(Icons.insights_outlined),label:'Progresso'),
-      NavigationDestination(icon:Icon(Icons.more_horiz),label:'Mais')]));
+      SettingsScreen(
+        dark:widget.dark,
+        language:widget.language,
+        onTheme:widget.onTheme,
+        onLanguage:widget.onLanguage,
+      )])),
+    bottomNavigationBar:NavigationBar(
+      selectedIndex:tab,
+      onDestinationSelected:(v)=>setState(()=>tab=v),
+      destinations:[
+        NavigationDestination(icon:const Icon(Icons.home_outlined),label:chemText(context,'Início','Home')),
+        NavigationDestination(icon:const Icon(Icons.menu_book_outlined),label:chemText(context,'Academia','Academy')),
+        NavigationDestination(icon:const Icon(Icons.science_outlined),label:chemText(context,'Laboratório','Lab')),
+        NavigationDestination(icon:const Icon(Icons.insights_outlined),label:chemText(context,'Progresso','Progress')),
+        NavigationDestination(icon:const Icon(Icons.more_horiz),label:chemText(context,'Mais','More')),
+      ],
+    ));
 }
 class HomeScreen extends StatelessWidget {
-  final ValueChanged<int> onTab; const HomeScreen({super.key,required this.onTab});
-  @override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(18),children:[
-    const Row(children:[CircleAvatar(radius:25,backgroundColor:blue,child:Icon(Icons.biotech,color:Colors.white,size:30)),SizedBox(width:12),
-      Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('ChemMaster',style:TextStyle(fontSize:25,fontWeight:FontWeight.w900)),Text('Aprender • Praticar • Conquistar',style:TextStyle(color:cyan))]))]),
-    const SizedBox(height:20),
-    Container(padding:const EdgeInsets.all(22),decoration:BoxDecoration(borderRadius:BorderRadius.circular(24),gradient:const LinearGradient(colors:[Color(0xFF0756C9),Color(0xFF32117D),Color(0xFF091B43)])),
-      child:const Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('A química começa aqui.',style:TextStyle(fontSize:23,fontWeight:FontWeight.bold)),SizedBox(height:8),Text('Aulas, exercícios e ferramentas para aprender química em qualquer lugar.'),SizedBox(height:12),Row(children:[Icon(Icons.offline_bolt,color:Colors.amber),SizedBox(width:8),Text('Conteúdos essenciais disponíveis offline')])])),
-    const SizedBox(height:20),const Text('Acesso rápido',style:TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
-    GridView.count(shrinkWrap:true,physics:const NeverScrollableScrollPhysics(),crossAxisCount:2,crossAxisSpacing:10,mainAxisSpacing:10,childAspectRatio:1.5,children:[
-      _HomeCard(icon:Icons.menu_book,title:'Academia',detail:'Classes e lições',onTap:()=>onTab(1)),
-      _HomeCard(icon:Icons.functions,title:'Equações',detail:'Balanceamento',onTap:()=>Navigator.push(context,neonRoute(const BalanceScreen()))),
-      _HomeCard(icon:Icons.calculate,title:'Calculadoras',detail:'Massa, mol e soluções',onTap:()=>Navigator.push(context,neonRoute(const CalculatorsScreen()))),
-      _HomeCard(icon:Icons.grid_on,title:'Tabela periódica',detail:'118 elementos',onTap:()=>Navigator.push(context,neonRoute(const PeriodicScreen()))),
-      _HomeCard(icon:Icons.auto_awesome,title:'Descobrir produtos',detail:'Prever reacções',onTap:()=>Navigator.push(context,neonRoute(const ProductDiscoveryScreen()))),
-      _HomeCard(icon:Icons.hub,title:'Estrutura atómica',detail:'Calcular Z, A e N',onTap:()=>Navigator.push(context,neonRoute(const AtomicStructureScreen()))),
-      _HomeCard(icon:Icons.electric_bolt,title:'Distribuição electrónica',detail:'Configuração electrónica',onTap:()=>Navigator.push(context,neonRoute(const ElectronDistributionScreen()))) ]),
-    const SizedBox(height:12),Card(child:ListTile(leading:const Icon(Icons.quiz,color:cyan),title:const Text('Avaliar conhecimentos'),subtitle:const Text('Exercícios por classe'),trailing:const Icon(Icons.chevron_right),onTap:()=>Navigator.push(context,neonRoute(const QuizScreen()))))
-  ]);
+  final ValueChanged<int> onTab;
+  const HomeScreen({super.key,required this.onTab});
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return ListView(padding:const EdgeInsets.all(18),children:[
+      Row(children:[
+        const CircleAvatar(radius:25,backgroundColor:blue,child:Icon(Icons.biotech,color:Colors.white,size:30)),
+        const SizedBox(width:12),
+        Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+          const Text('ChemMaster',style:TextStyle(fontSize:25,fontWeight:FontWeight.w900)),
+          Text(english?'Learn • Explore • Understand':'Aprender • Explorar • Compreender',style:const TextStyle(color:cyan)),
+        ])),
+      ]),
+      const SizedBox(height:20),
+      Container(
+        padding:const EdgeInsets.all(22),
+        decoration:BoxDecoration(
+          borderRadius:BorderRadius.circular(24),
+          gradient:const LinearGradient(colors:[Color(0xFF0756C9),Color(0xFF32117D),Color(0xFF091B43)]),
+        ),
+        child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+          Text(english?'Chemistry, made clearer.':'Química, com mais clareza.',style:const TextStyle(fontSize:23,fontWeight:FontWeight.bold)),
+          const SizedBox(height:8),
+          Text(english
+            ?'Choose elements and substances, explore reactions and learn why the answers work.'
+            :'Escolhe elementos e substâncias, explora reacções e aprende por que razão as respostas funcionam.'),
+          const SizedBox(height:12),
+          Row(children:[
+            const Icon(Icons.offline_bolt,color:Colors.amber),
+            const SizedBox(width:8),
+            Text(english?'Core tools work offline':'Ferramentas essenciais funcionam offline'),
+          ]),
+        ]),
+      ),
+      const SizedBox(height:20),
+      Text(english?'Quick access':'Acesso rápido',style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+      const SizedBox(height:8),
+      GridView.count(
+        shrinkWrap:true,
+        physics:const NeverScrollableScrollPhysics(),
+        crossAxisCount:2,
+        crossAxisSpacing:10,
+        mainAxisSpacing:10,
+        childAspectRatio:1.42,
+        children:[
+          _HomeCard(icon:Icons.auto_awesome,title:english?'Discover products':'Descobrir produtos',detail:english?'Choose reactants':'Escolher reagentes',onTap:()=>Navigator.push(context,neonRoute(const ProductDiscoveryScreen()))),
+          _HomeCard(icon:Icons.functions,title:english?'Balance equation':'Equilibrar equação',detail:english?'Build both sides':'Construir os dois lados',onTap:()=>Navigator.push(context,neonRoute(const BalanceScreen()))),
+          _HomeCard(icon:Icons.hub,title:english?'Atomic structure':'Estrutura atómica',detail:english?'Calculate Z, A and N':'Calcular Z, A e N',onTap:()=>Navigator.push(context,neonRoute(const AtomicStructureScreen()))),
+          _HomeCard(icon:Icons.electric_bolt,title:english?'Electron configuration':'Distribuição electrónica',detail:english?'Shells and subshells':'Camadas e subníveis',onTap:()=>Navigator.push(context,neonRoute(const ElectronDistributionScreen()))),
+        ],
+      ),
+      const SizedBox(height:12),
+      Card(child:ListTile(
+        leading:const Icon(Icons.grid_on,color:cyan),
+        title:Text(english?'Explore the periodic table':'Explorar a tabela periódica'),
+        subtitle:Text(english?'118 elements, organized by family':'118 elementos, organizados por família'),
+        trailing:const Icon(Icons.chevron_right),
+        onTap:()=>Navigator.push(context,neonRoute(const PeriodicScreen())),
+      )),
+      Card(child:ListTile(
+        leading:const Icon(Icons.calculate,color:cyan),
+        title:Text(english?'Chemistry calculators':'Calculadoras de Química'),
+        subtitle:Text(english?'Moles, molar mass and solutions':'Moles, massa molar e soluções'),
+        trailing:const Icon(Icons.chevron_right),
+        onTap:()=>Navigator.push(context,neonRoute(const CalculatorsScreen())),
+      )),
+    ]);
+  }
 }
 class _HomeCard extends StatelessWidget {
   final IconData icon;final String title,detail;final VoidCallback onTap;
@@ -166,18 +236,62 @@ class LessonScreen extends StatelessWidget {
 
 class ToolsScreen extends StatelessWidget {
   const ToolsScreen({super.key});
-  @override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(18),children:[
-    const Text('Ferramentas',style:TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
-    _ToolTile('Balancear equações','Equações com grupos e parênteses',Icons.functions,const BalanceScreen()),
-    _ToolTile('Calculadoras químicas','Massa molar, mol, concentração, densidade e diluição',Icons.calculate,const CalculatorsScreen()),
-    _ToolTile('Tabela periódica','Pesquisa dos 118 elementos',Icons.grid_on,const PeriodicScreen()),
-    _ToolTile('Descobrir produtos','Escreve os reagentes e vê produtos conhecidos e equação ajustada',Icons.auto_awesome,const ProductDiscoveryScreen()),
-    _ToolTile('Estrutura atómica','Calcula Z, A, N, protões e electrões',Icons.hub,const AtomicStructureScreen()),
-    _ToolTile('Distribuição electrónica','Configuração electrónica e electrões por camadas',Icons.electric_bolt,const ElectronDistributionScreen()),
-    _ToolTile('Tipos de reacções','Síntese, decomposição, deslocamento, dupla troca e neutralização',Icons.sync_alt,const ReactionScreen()),
-    _ToolTile('Nomenclatura','Óxidos, ácidos, bases e sais',Icons.spellcheck,const NomenclatureScreen()),
-    _ToolTile('Testes e exercícios','Questionário de conhecimentos',Icons.quiz,const QuizScreen()),
-  ]);
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return ListView(padding:const EdgeInsets.all(18),children:[
+      Text(english?'Chemistry lab':'Laboratório de Química',style:const TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
+      Text(english
+        ?'A practical toolbox for solving, exploring and understanding chemistry.'
+        :'Um conjunto de ferramentas para resolver, explorar e compreender Química.'),
+      const SizedBox(height:18),
+      _LabSection(
+        title:english?'REACTIONS & EQUATIONS':'REACÇÕES E EQUAÇÕES',
+        children:[
+          _ToolTile(english?'Discover products':'Descobrir produtos',english?'Choose reactants from the catalog':'Escolhe reagentes no catálogo',Icons.auto_awesome,const ProductDiscoveryScreen()),
+          _ToolTile(english?'Build and balance an equation':'Construir e equilibrar equação',english?'Choose substances on both sides':'Escolhe substâncias nos dois lados',Icons.functions,const BalanceScreen()),
+          _ToolTile(english?'Reaction types':'Tipos de reacções',english?'Synthesis, decomposition, acid-base and more':'Síntese, decomposição, ácido-base e mais',Icons.sync_alt,const ReactionScreen()),
+        ],
+      ),
+      _LabSection(
+        title:english?'ELEMENTS & ATOMS':'ELEMENTOS E ÁTOMOS',
+        children:[
+          _ToolTile(english?'Periodic table':'Tabela periódica',english?'118 elements by family':'118 elementos por família',Icons.grid_on,const PeriodicScreen()),
+          _ToolTile(english?'Atomic structure':'Estrutura atómica',english?'Calculate Z, A, neutrons and particles':'Calcular Z, A, neutrões e partículas',Icons.hub,const AtomicStructureScreen()),
+          _ToolTile(english?'Electron configuration':'Distribuição electrónica',english?'Electron configuration and shells':'Configuração electrónica e camadas',Icons.electric_bolt,const ElectronDistributionScreen()),
+        ],
+      ),
+      _LabSection(
+        title:english?'CALCULATIONS & SOLUTIONS':'CÁLCULOS E SOLUÇÕES',
+        children:[
+          _ToolTile(english?'Chemistry calculators':'Calculadoras químicas',english?'Molar mass, moles, concentration, density and dilution':'Massa molar, mol, concentração, densidade e diluição',Icons.calculate,const CalculatorsScreen()),
+        ],
+      ),
+      _LabSection(
+        title:english?'LEARN & PRACTISE':'APRENDER E PRATICAR',
+        children:[
+          _ToolTile(english?'Nomenclature':'Nomenclatura',english?'Oxides, acids, bases and salts':'Óxidos, ácidos, bases e sais',Icons.spellcheck,const NomenclatureScreen()),
+          _ToolTile(english?'Exercises and tests':'Exercícios e testes',english?'Check knowledge and see explanations':'Avaliar conhecimentos e ver explicações',Icons.quiz,const QuizScreen()),
+        ],
+      ),
+    ]);
+  }
+}
+class _LabSection extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+  const _LabSection({required this.title,required this.children});
+  @override
+  Widget build(BuildContext context)=>Padding(
+    padding:const EdgeInsets.only(top:10,bottom:9),
+    child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+      Padding(
+        padding:const EdgeInsets.only(left:4,bottom:6),
+        child:Text(title,style:const TextStyle(fontSize:11,letterSpacing:1.2,fontWeight:FontWeight.w900,color:cyan)),
+      ),
+      Card(child:Column(children:children)),
+    ]),
+  );
 }
 class _ToolTile extends StatelessWidget {
   final String title,detail;final IconData icon;final Widget page;
