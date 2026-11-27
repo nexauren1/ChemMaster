@@ -523,7 +523,7 @@ class _AtomicStructureScreenState extends State<AtomicStructureScreen> {
             controller: _massNumber,
             keyboardType: TextInputType.number,
             onChanged: (_) => setState(() {}),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: _english ? 'Mass number (A)' : 'Número de massa (A)',
               helperText: _english ? 'Examples: C-12, Na-23, Cl-35' : 'Exemplos: C-12, Na-23, Cl-35',
               prefixIcon: Icon(Icons.numbers),
@@ -558,7 +558,7 @@ class _AtomicStructureScreenState extends State<AtomicStructureScreen> {
             ),
           ],
           const SizedBox(height: 12),
-          const _InfoPanel(
+          _InfoPanel(
             title: _english ? 'About isotopes' : 'Atenção aos isótopos',
             body: _english
                 ? 'The same element can have several isotopes. They all have the same Z but can have different A and N values. The suggested starting value is only a representative isotope; check which isotope your exercise asks for.'
@@ -649,7 +649,7 @@ class _ElectronDistributionScreenState
                   ),
                   if (result.isApproximate) ...[
                     const SizedBox(height: 10),
-                    const Text(
+                    Text(
                       _english
                           ? 'Note: for this heavy element, the configuration is an Aufbau prediction and may differ from specialist ground-state reference tables.'
                           : 'Nota: para este elemento pesado, a configuração é uma previsão pela regra de preenchimento e pode diferir de tabelas especializadas do estado fundamental.',
@@ -661,14 +661,14 @@ class _ElectronDistributionScreenState
             ),
           ),
           const SizedBox(height: 12),
-          const _InfoPanel(
+          _InfoPanel(
             title: _english ? 'How does the app calculate it?' : 'Como o app chega à distribuição?',
             body: _english
                 ? '1. In a neutral atom, the number of electrons equals Z. 2. Electrons fill lower-energy subshells first, following the Aufbau order. 3. Each subshell has a maximum capacity: s holds 2, p holds 6, d holds 10 and f holds 14 electrons. 4. Shell distribution adds the electrons that share the same principal quantum number.'
                 : '1. Num átomo neutro, o número de electrões é igual a Z. 2. Os electrões ocupam primeiro os subníveis de menor energia, seguindo a ordem de preenchimento ensinada pela regra de Aufbau. 3. Cada subnível tem uma capacidade máxima: s comporta 2, p comporta 6, d comporta 10 e f comporta 14 electrões. 4. A distribuição por camadas soma os electrões que têm o mesmo número quântico principal.',
           ),
           const SizedBox(height: 8),
-          const _InfoPanel(
+          _InfoPanel(
             title: _english ? 'Important' : 'Importante',
             body: _english
                 ? 'The displayed configuration is for a neutral atom. Ions have different numbers of electrons. Some transition and heavy elements do not follow the simplified filling order; the app flags results that need confirmation.'
