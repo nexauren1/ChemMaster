@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../chemistry/equation_balancer.dart';
+import '../chemistry/equation_analysis.dart';
 import '../chemistry/formula_parser.dart';
 import '../core/chem_language.dart';
 import '../data/chemical_catalog.dart';
@@ -84,24 +85,6 @@ class _EquationBuilderScreenState extends State<EquationBuilderScreen> {
     }
   }
 
-  Map<String, List<int>> _atomTotals(String equation) {
-    final result = <String, List<int>>{};
-    final sides = equation.split('→');
-    if (sides.length != 2) return result;
-    for (var side = 0; side < 2; side++) {
-      for (final term in sides[side].split('+')) {
-        final match = RegExp(r'^\s*([0-9]+)?\s*(.+?)\s*$').firstMatch(term);
-        if (match == null) continue;
-        final coefficient = int.tryParse(match.group(1) ?? '1') ?? 1;
-        final atoms = FormulaParser.parse(match.group(2)!);
-        for (final entry in atoms.entries) {
-          result.putIfAbsent(entry.key, () => [0, 0]);
-          result[entry.key]![side] += entry.value * coefficient;
-        }
-      }
-    }
-    return result;
-  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -161,7 +144,7 @@ class _EquationBuilderScreenState extends State<EquationBuilderScreen> {
           const SizedBox(height: 16),
           _BalancedEquationCard(
             equation: _equation!,
-            counts: _atomTotals(_equation!),
+            counts: EquationAnalysis.analyze(_equation!),
             english: _english,
           ),
         ],
@@ -278,7 +261,7 @@ class _SpeciesSection extends StatelessWidget {
 
 class _BalancedEquationCard extends StatelessWidget {
   final String equation;
-  final Map<String, List<int>> counts;
+  final Map<String, AtomBalance> counts;
   final bool english;
 
   const _BalancedEquationCard({
@@ -321,11 +304,11 @@ class _BalancedEquationCard extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(width: 34, child: Text(entry.key, style: const TextStyle(fontWeight: FontWeight.w900))),
-                  Expanded(child: Text((english ? 'Reactants: ' : 'Reagentes: ') + entry.value[0].toString())),
-                  Expanded(child: Text((english ? 'Products: ' : 'Produtos: ') + entry.value[1].toString())),
+                  Expanded(child: Text((english ? 'Reactants: ' : 'Reagentes: ') + entry.value.reactants.toString())),
+                  Expanded(child: Text((english ? 'Products: ' : 'Produtos: ') + entry.value.products.toString())),
                   Icon(
-                    entry.value[0] == entry.value[1] ? Icons.check_circle : Icons.error,
-                    color: entry.value[0] == entry.value[1] ? Colors.green : Colors.red,
+                    entry.value.isBalanced ? Icons.check_circle : Icons.error,
+                    color: entry.value.isBalanced ? Colors.green : Colors.red,
                     size: 18,
                   ),
                 ],
