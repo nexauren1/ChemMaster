@@ -99,7 +99,9 @@ class _ProductDiscoveryScreenState extends State<ProductDiscoveryScreen> {
     } on FormatException catch (error) {
       setState(() {
         _prediction = null;
-        _message = error.message.toString();
+        _message = _english
+            ? 'I could not interpret this selection. Check the chosen substances and try again.'
+            : error.message.toString();
         _searched = true;
       });
     } catch (_) {
