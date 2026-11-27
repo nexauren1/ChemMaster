@@ -167,7 +167,7 @@ final List<ChemicalSpecies> chemicalCatalog = [
 ];
 
 const Map<String, String> diatomicElementFormulas = {
-  'H':'H2','N':'N2','O':'O2','F':'F2','Cl':'Cl2','Br':'Br2','I':'I2',
+  'H':'H2','N':'N2','O':'O2','F':'F2','Cl':'Cl2','Br':'Br2','I':'I2','P':'P4','S':'S8',
 };
 
 String formulaForReaction(ChemicalSpecies species) {
