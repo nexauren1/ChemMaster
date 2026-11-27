@@ -27,7 +27,7 @@ class _EquationBuilderScreenState extends State<EquationBuilderScreen> {
     if (!mounted || species == null) return;
     setState(() {
       final destination = toReactants ? _reactants : _products;
-      if (!destination.any((item) => item.id == species.id)) {
+      if (!destination.any((item) => formulaForReaction(item) == formulaForReaction(species))) {
         destination.add(species);
       }
       _equation = null;
