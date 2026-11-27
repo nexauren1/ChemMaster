@@ -74,12 +74,12 @@ class _ProductDiscoveryScreenState extends State<ProductDiscoveryScreen> {
   }
 
   void _discover() {
-    if (_reactants.length < 2) {
+    if (_reactants.isEmpty) {
       setState(() {
         _prediction = null;
         _message = _english
-            ? 'Choose at least two reactants. A reaction needs substances to interact.'
-            : 'Escolhe pelo menos dois reagentes. Uma reacção precisa de substâncias que interajam.';
+            ? 'Choose at least one reactant or starting substance.'
+            : 'Escolhe pelo menos um reagente ou substância inicial.';
         _searched = true;
       });
       return;
@@ -231,6 +231,14 @@ class _ProductDiscoveryScreenState extends State<ProductDiscoveryScreen> {
             ActionChip(
               label: const Text('CH₄ + O₂'),
               onPressed: () => _loadExample(['CH4', 'O2']),
+            ),
+            ActionChip(
+              label: const Text('H₂O₂'),
+              onPressed: () => _loadExample(['H2O2']),
+            ),
+            ActionChip(
+              label: const Text('CaCO₃'),
+              onPressed: () => _loadExample(['CaCO3']),
             ),
             ActionChip(
               label: Text(_english ? 'Soap' : 'Sabão'),
