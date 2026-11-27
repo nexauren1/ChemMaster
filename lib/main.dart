@@ -473,44 +473,143 @@ class _ProgressScreenState extends State<ProgressScreen>{
   ]); });
 }
 class SettingsScreen extends StatelessWidget {
-  final bool dark;final VoidCallback onTheme;
-  const SettingsScreen({super.key,required this.dark,required this.onTheme});
-  @override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(18),children:[
-    const Text('Definições',style:TextStyle(fontSize:28,fontWeight:FontWeight.w900)),
-    const Text('Personaliza a tua experiência de aprendizagem.'),
-    const SizedBox(height:16),
-    _SettingsSection(title:'APARÊNCIA',children:[
-      SwitchListTile(value:dark,onChanged:(_)=>onTheme(),secondary:const Icon(Icons.dark_mode_outlined,color:cyan),title:const Text('Modo escuro'),subtitle:Text(dark?'Tema azul neon activo':'Tema claro activo')),
-      const ListTile(leading:Icon(Icons.palette_outlined,color:violet),title:Text('Identidade visual'),subtitle:Text('Azul eléctrico • Ciano • Violeta')),
-    ]),
-    _SettingsSection(title:'PREFERÊNCIAS',children:[
-      const ListTile(leading:Icon(Icons.language,color:cyan),title:Text('Idioma'),subtitle:Text('Português (Moçambique) • Outros idiomas numa próxima versão')),
-      const ListTile(leading:Icon(Icons.offline_pin_outlined,color:cyan),title:Text('Acesso offline'),subtitle:Text('Aulas, tabela periódica e ferramentas disponíveis sem Internet')),
-      const ListTile(leading:Icon(Icons.notifications_none,color:cyan),title:Text('Notificações'),subtitle:Text('Lembretes de estudo — brevemente')),
-    ]),
-    _SettingsSection(title:'DADOS E PRIVACIDADE',children:[
-      const ListTile(leading:Icon(Icons.phone_android,color:cyan),title:Text('Armazenamento local'),subtitle:Text('O progresso é guardado neste dispositivo.')),
-      ListTile(leading:const Icon(Icons.delete_outline,color:Colors.orange),title:const Text('Limpar progresso'),subtitle:const Text('Apagar lições concluídas e resultados guardados.'),onTap:()async{
-        final confirmed=await showDialog<bool>(context:context,builder:(dialogContext)=>AlertDialog(
-          title:const Text('Limpar progresso?'),
-          content:const Text('Esta acção apaga as lições concluídas e os resultados guardados neste dispositivo.'),
-          actions:[
-            TextButton(onPressed:()=>Navigator.pop(dialogContext,false),child:const Text('Cancelar')),
-            FilledButton(onPressed:()=>Navigator.pop(dialogContext,true),child:const Text('Limpar')),
-          ],
-        ));
-        if(confirmed==true){
-          await ProgressStore.clear();
-          if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Progresso apagado.')));
-        }
-      }),
-    ]),
-    _SettingsSection(title:'SOBRE',children:[
-      const ListTile(leading:Icon(Icons.science_outlined,color:cyan),title:Text('ChemMaster'),subtitle:Text('Aprender • Praticar • Conquistar')),
-      const ListTile(leading:Icon(Icons.public,color:cyan),title:Text('Desenvolvido para Moçambique'),subtitle:Text('Com visão de expansão para estudantes de todo o mundo.')),
-      const ListTile(leading:Icon(Icons.info_outline,color:cyan),title:Text('Versão 1.0.0'),subtitle:Text('Primeira versão de aprendizagem química.')),
-    ]),
-  ]);
+  final bool dark;
+  final String language;
+  final VoidCallback onTheme;
+  final ValueChanged<String> onLanguage;
+
+  const SettingsScreen({
+    super.key,
+    required this.dark,
+    required this.language,
+    required this.onTheme,
+    required this.onLanguage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return ListView(padding:const EdgeInsets.all(18),children:[
+      Text(english?'Settings':'Definições',style:const TextStyle(fontSize:28,fontWeight:FontWeight.w900)),
+      Text(english
+          ?'Make ChemMaster work the way you study.'
+          :'Personaliza a tua experiência de aprendizagem.'),
+      const SizedBox(height:16),
+      _SettingsSection(title:english?'APPEARANCE':'APARÊNCIA',children:[
+        SwitchListTile(
+          value:dark,
+          onChanged:(_)=>onTheme(),
+          secondary:const Icon(Icons.dark_mode_outlined,color:cyan),
+          title:Text(english?'Dark mode':'Modo escuro'),
+          subtitle:Text(dark
+              ?(english?'Neon blue theme active':'Tema azul neon activo')
+              :(english?'Light theme active':'Tema claro activo')),
+        ),
+        ListTile(
+          leading:const Icon(Icons.palette_outlined,color:violet),
+          title:Text(english?'Visual identity':'Identidade visual'),
+          subtitle:const Text('Electric blue • Cyan • Violet'),
+        ),
+      ]),
+      _SettingsSection(title:english?'LANGUAGE':'IDIOMA',children:[
+        ListTile(
+          leading:const Icon(Icons.translate,color:cyan),
+          title:Text(english?'App language':'Idioma do aplicativo'),
+          subtitle:Text(english
+              ?'Choose the language for menus and tools.'
+              :'Escolhe o idioma dos menus e das ferramentas.'),
+          trailing:DropdownButtonHideUnderline(
+            child:DropdownButton<String>(
+              value:language,
+              onChanged:(value){if(value!=null)onLanguage(value);},
+              items:const [
+                DropdownMenuItem(value:'pt',child:Text('Português')),
+                DropdownMenuItem(value:'en',child:Text('English')),
+              ],
+            ),
+          ),
+        ),
+      ]),
+      _SettingsSection(title:english?'PREFERENCES':'PREFERÊNCIAS',children:[
+        ListTile(
+          leading:const Icon(Icons.offline_pin_outlined,color:cyan),
+          title:Text(english?'Offline access':'Acesso offline'),
+          subtitle:Text(english
+              ?'The catalog, periodic table and core tools are available without internet.'
+              :'O catálogo, a tabela periódica e as ferramentas essenciais funcionam sem Internet.'),
+        ),
+        ListTile(
+          leading:const Icon(Icons.notifications_none,color:cyan),
+          title:Text(english?'Study reminders':'Lembretes de estudo'),
+          subtitle:Text(english?'Coming in a future update':'Disponíveis numa actualização futura'),
+        ),
+      ]),
+      _SettingsSection(title:english?'DATA & PRIVACY':'DADOS E PRIVACIDADE',children:[
+        ListTile(
+          leading:const Icon(Icons.phone_android,color:cyan),
+          title:Text(english?'Local storage':'Armazenamento local'),
+          subtitle:Text(english
+              ?'Your progress is stored on this device.'
+              :'O teu progresso é guardado neste dispositivo.'),
+        ),
+        ListTile(
+          leading:const Icon(Icons.delete_outline,color:Colors.orange),
+          title:Text(english?'Clear progress':'Limpar progresso'),
+          subtitle:Text(english
+              ?'Delete completed lessons and saved results.'
+              :'Apagar lições concluídas e resultados guardados.'),
+          onTap:()async{
+            final confirmed=await showDialog<bool>(
+              context:context,
+              builder:(dialogContext)=>AlertDialog(
+                title:Text(english?'Clear progress?':'Limpar progresso?'),
+                content:Text(english
+                    ?'This deletes completed lessons and saved results on this device.'
+                    :'Esta acção apaga as lições concluídas e os resultados guardados neste dispositivo.'),
+                actions:[
+                  TextButton(
+                    onPressed:()=>Navigator.pop(dialogContext,false),
+                    child:Text(english?'Cancel':'Cancelar'),
+                  ),
+                  FilledButton(
+                    onPressed:()=>Navigator.pop(dialogContext,true),
+                    child:Text(english?'Clear':'Limpar'),
+                  ),
+                ],
+              ),
+            );
+            if(confirmed==true){
+              await ProgressStore.clear();
+              if(context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content:Text(english?'Progress cleared.':'Progresso apagado.')),
+                );
+              }
+            }
+          },
+        ),
+      ]),
+      _SettingsSection(title:english?'ABOUT':'SOBRE',children:[
+        ListTile(
+          leading:const Icon(Icons.science_outlined,color:cyan),
+          title:const Text('ChemMaster'),
+          subtitle:Text(english?'Learn • Explore • Understand':'Aprender • Explorar • Compreender'),
+        ),
+        ListTile(
+          leading:const Icon(Icons.public,color:cyan),
+          title:Text(english?'Made for Mozambique':'Desenvolvido para Moçambique'),
+          subtitle:Text(english
+              ?'Built to grow with students and teachers everywhere.'
+              :'Com visão de expansão para estudantes e professores de todo o mundo.'),
+        ),
+        ListTile(
+          leading:const Icon(Icons.info_outline,color:cyan),
+          title:Text(english?'Version 1.0.0':'Versão 1.0.0'),
+          subtitle:Text(english?'Chemistry learning platform':'Plataforma de aprendizagem de Química'),
+        ),
+      ]),
+    ]);
+  }
 }
 class _SettingsSection extends StatelessWidget {
   final String title;final List<Widget> children;
