@@ -68,7 +68,6 @@ class _ProductDiscoveryScreenState extends State<ProductDiscoveryScreen> {
             const SizedBox(height: 14),
             TextField(
               controller: _input,
-              textCapitalization: TextCapitalization.characters,
               textInputAction: TextInputAction.search,
               onSubmitted: (_) => _discover(),
               decoration: const InputDecoration(
