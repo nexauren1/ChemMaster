@@ -617,10 +617,22 @@ class _NameCard extends StatelessWidget {
   @override Widget build(BuildContext context)=>Card(child:ExpansionTile(title:Text(title,style:const TextStyle(fontWeight:FontWeight.bold)),subtitle:Text(description),children:examples.map((e)=>ListTile(title:Text(e))).toList()));
 }
 
-class QuizScreen extends StatefulWidget {const QuizScreen({super.key});@override State<QuizScreen> createState()=>_QuizScreenState();}
+class QuizScreen extends StatefulWidget {
+  const QuizScreen({super.key});
+  @override State<QuizScreen> createState()=>_QuizScreenState();
+}
 class _QuizScreenState extends State<QuizScreen>{
-  String grade='Todas';int index=0,score=0;int? selected;bool answered=false,finished=false;
-  List<QuizQuestion> get questions=>quizBank.where((q)=>grade=='Todas'||q.grade==grade).toList();
+  String grade='Todas';
+  int index=0,score=0;
+  int? selected;
+  bool answered=false,finished=false;
+  bool get _english=>isEnglish(context);
+
+  List<QuizQuestion> get questions {
+    final base=quizBank.where((q)=>grade=='Todas'||q.grade==grade).toList();
+    return base.map((q)=>localizedQuizQuestion(q,_english)).toList();
+  }
+
   void next(){
     if(selected==null)return;
     final q=questions[index];
@@ -631,24 +643,105 @@ class _QuizScreenState extends State<QuizScreen>{
     }
     if(index+1>=questions.length){
       setState(() { finished=true; });
-      ProgressStore.saveQuiz('quiz-$grade',score,questions.length);
+      ProgressStore.saveQuiz('quiz-'+grade,score,questions.length);
     } else {
       setState(() { index++; selected=null; answered=false; });
     }
   }
-  @override Widget build(BuildContext context){
+
+  @override
+  Widget build(BuildContext context){
     final qs=questions;
-    return Scaffold(appBar:AppBar(title:const Text('Exercícios e avaliações')),body:finished?Center(child:Padding(padding:const EdgeInsets.all(24),child:Column(mainAxisSize:MainAxisSize.min,children:[const Icon(Icons.emoji_events,color:Colors.amber,size:64),Text('Resultado: $score / ${qs.length}',style:const TextStyle(fontSize:25,fontWeight:FontWeight.bold)),const SizedBox(height:12),FilledButton(onPressed:()=>setState(() { index=0; score=0; selected=null; answered=false; finished=false; }),child:const Text('Repetir avaliação'))]))):ListView(padding:const EdgeInsets.all(18),children:[
-      DropdownButtonFormField<String>(initialValue:grade,decoration:const InputDecoration(labelText:'Classe',border:OutlineInputBorder()),items:['Todas','7.ª classe','8.ª classe','9.ª classe','10.ª classe','11.ª classe','12.ª classe'].map((v)=>DropdownMenuItem(value:v,child:Text(v))).toList(),onChanged:(v)=>setState(() { grade=v!; index=0; score=0; selected=null; answered=false; finished=false; })),
-      const SizedBox(height:18),Text('Questão ${index+1} de ${qs.length}',style:const TextStyle(color:cyan)),
-      Text(qs[index].prompt,style:const TextStyle(fontSize:20,fontWeight:FontWeight.bold)),
-      const SizedBox(height:12),...List.generate(qs[index].options.length,(i)=>Card(child:RadioListTile<int>(value:i,groupValue:selected,title:Text(qs[index].options[i]),onChanged:answered?null:(v)=>setState(()=>selected=v)))),
-      if(answered)Card(child:Padding(padding:const EdgeInsets.all(14),child:Text((selected==qs[index].answer?'Correcto! ':'Não está correcto. A resposta certa é: ${qs[index].options[qs[index].answer]}. ')+qs[index].explanation,style:const TextStyle(height:1.4)))),
-      FilledButton(onPressed:selected==null?null:next,child:Text(!answered?'Verificar resposta':index+1==qs.length?'Ver resultado':'Próxima questão'))
-    ]));
+    final gradeOptions=['Todas','7.ª classe','8.ª classe','9.ª classe','10.ª classe','11.ª classe','12.ª classe'];
+    return Scaffold(
+      appBar:AppBar(title:Text(_english?'Exercises and assessments':'Exercícios e avaliações')),
+      body:finished
+        ?Center(
+          child:Padding(
+            padding:const EdgeInsets.all(24),
+            child:Column(
+              mainAxisSize:MainAxisSize.min,
+              children:[
+                const Icon(Icons.emoji_events,color:Colors.amber,size:64),
+                Text(
+                  (_english?'Result: ':'Resultado: ')+score.toString()+' / '+qs.length.toString(),
+                  style:const TextStyle(fontSize:25,fontWeight:FontWeight.bold),
+                ),
+                const SizedBox(height:12),
+                FilledButton(
+                  onPressed:()=>setState(() {
+                    index=0;score=0;selected=null;answered=false;finished=false;
+                  }),
+                  child:Text(_english?'Try again':'Repetir avaliação'),
+                ),
+              ],
+            ),
+          ),
+        )
+        :ListView(
+          padding:const EdgeInsets.all(18),
+          children:[
+            DropdownButtonFormField<String>(
+              initialValue:grade,
+              decoration:InputDecoration(
+                labelText:_english?'Grade':'Classe',
+                border:const OutlineInputBorder(),
+              ),
+              items:gradeOptions.map((value)=>DropdownMenuItem(
+                value:value,
+                child:Text(value=='Todas'
+                  ?(_english?'All grades':'Todas')
+                  :localizedGrade(value,_english)),
+              )).toList(),
+              onChanged:(value)=>setState(() {
+                grade=value!;
+                index=0;score=0;selected=null;answered=false;finished=false;
+              }),
+            ),
+            const SizedBox(height:18),
+            Text(
+              (_english?'Question ':'Questão ')+(index+1).toString()+
+              (_english?' of ':' de ')+qs.length.toString(),
+              style:const TextStyle(color:cyan),
+            ),
+            Text(qs[index].prompt,style:const TextStyle(fontSize:20,fontWeight:FontWeight.bold)),
+            const SizedBox(height:12),
+            ...List.generate(qs[index].options.length,(i)=>Card(
+              child:RadioListTile<int>(
+                value:i,
+                groupValue:selected,
+                title:Text(qs[index].options[i]),
+                onChanged:answered?null:(value)=>setState(()=>selected=value),
+              ),
+            )),
+            if(answered)
+              Card(
+                child:Padding(
+                  padding:const EdgeInsets.all(14),
+                  child:Text(
+                    (selected==qs[index].answer
+                      ?(_english?'Correct! ':'Correcto! ')
+                      :(_english
+                        ?'Not quite. The correct answer is: '
+                        :'Não está correcto. A resposta certa é: ')+qs[index].options[qs[index].answer]+'. ')+
+                    qs[index].explanation,
+                    style:const TextStyle(height:1.4),
+                  ),
+                ),
+              ),
+            FilledButton(
+              onPressed:selected==null?null:next,
+              child:Text(!answered
+                ?(_english?'Check answer':'Verificar resposta')
+                :index+1==qs.length
+                  ?(_english?'See result':'Ver resultado')
+                  :(_english?'Next question':'Próxima questão')),
+            ),
+          ],
+        ),
+    );
   }
 }
-
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
   @override State<ProgressScreen> createState()=>_ProgressScreenState();
