@@ -67,6 +67,21 @@ class _ChemicalPickerSheetState extends State<ChemicalPickerSheet> {
   bool get _english => isEnglish(context);
   bool get _canSwitch => widget.mode == ChemicalPickerMode.all;
 
+  String _fold(String value) => value
+      .toLowerCase()
+      .replaceAll('á', 'a')
+      .replaceAll('à', 'a')
+      .replaceAll('ã', 'a')
+      .replaceAll('â', 'a')
+      .replaceAll('é', 'e')
+      .replaceAll('ê', 'e')
+      .replaceAll('í', 'i')
+      .replaceAll('ó', 'o')
+      .replaceAll('ô', 'o')
+      .replaceAll('õ', 'o')
+      .replaceAll('ú', 'u')
+      .replaceAll('ç', 'c');
+
   @override
   void initState() {
     super.initState();
@@ -86,12 +101,12 @@ class _ChemicalPickerSheetState extends State<ChemicalPickerSheet> {
   }
 
   List<ChemicalSpecies> get _items {
-    final query = _query.trim().toLowerCase();
+    final query = _fold(_query.trim());
     final filtered = _source.where((item) {
       final matchesGroup = _group == null || item.group == _group;
       final matchesSearch = query.isEmpty ||
-          item.namePt.toLowerCase().contains(query) ||
-          item.nameEn.toLowerCase().contains(query) ||
+          _fold(item.namePt).contains(query) ||
+          _fold(item.nameEn).contains(query) ||
           item.formula.toLowerCase().contains(query) ||
           (item.atomicNumber?.toString() == query);
       return matchesGroup && matchesSearch;
