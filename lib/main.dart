@@ -371,15 +371,101 @@ class _CalculatorsScreenState extends State<CalculatorsScreen>{
   ])));
 }
 
-class PeriodicScreen extends StatefulWidget {const PeriodicScreen({super.key});@override State<PeriodicScreen> createState()=>_PeriodicScreenState();}
+class PeriodicScreen extends StatefulWidget {
+  const PeriodicScreen({super.key});
+  @override State<PeriodicScreen> createState()=>_PeriodicScreenState();
+}
 class _PeriodicScreenState extends State<PeriodicScreen>{
-  final search=TextEditingController();String query='';
-  @override Widget build(BuildContext context){
-    final elements=periodicElements.where((e)=>e.name.toLowerCase().contains(query.toLowerCase())||e.symbol.toLowerCase().contains(query.toLowerCase())||e.number.toString()==query).toList();
-    return Scaffold(appBar:AppBar(title:const Text('Tabela periódica — 118 elementos')),body:Column(children:[
-      Padding(padding:const EdgeInsets.all(12),child:TextField(controller:search,onChanged:(v)=>setState(()=>query=v),decoration:const InputDecoration(prefixIcon:Icon(Icons.search),hintText:'Pesquisar elemento ou símbolo',border:OutlineInputBorder()))),
-      Expanded(child:GridView.builder(padding:const EdgeInsets.all(10),itemCount:elements.length,gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,crossAxisSpacing:7,mainAxisSpacing:7,childAspectRatio:.95),itemBuilder:(context,i){final e=elements[i];return Card(child:InkWell(onTap:()=>showDialog(context:context,builder:(_)=>AlertDialog(title:Text('${e.symbol} — ${e.name}'),content:Text('Número atómico: ${e.number}\nMassa atómica: ${e.atomicMass} u\nClassificação: ${e.category}'))),child:Padding(padding:const EdgeInsets.all(5),child:Column(mainAxisAlignment:MainAxisAlignment.center,children:[Text('${e.number}',style:const TextStyle(fontSize:10)),Text(e.symbol,style:const TextStyle(fontSize:23,fontWeight:FontWeight.bold,color:cyan)),Text(e.name,textAlign:TextAlign.center,style:const TextStyle(fontSize:9),maxLines:2,overflow:TextOverflow.ellipsis)]))));}))
-    ]));
+  final search=TextEditingController();
+  String query='';
+  bool get _english=>isEnglish(context);
+
+  String _name(ChemicalElement element) =>
+      _english ? (elementEnglishNames[element.symbol] ?? element.name) : element.name;
+
+  String _category(String category) {
+    if (!_english) return category;
+    const names={
+      'Não metal':'Nonmetal',
+      'Gás nobre':'Noble gas',
+      'Metal alcalino':'Alkali metal',
+      'Metal alcalino-terroso':'Alkaline earth metal',
+      'Semimetal':'Metalloid',
+      'Halogéneo':'Halogen',
+      'Metal de transição':'Transition metal',
+      'Metal pós-transição':'Post-transition metal',
+      'Lantanídeo':'Lanthanide',
+      'Actinídeo':'Actinide',
+    };
+    return names[category]??category;
+  }
+
+  @override
+  Widget build(BuildContext context){
+    final elements=periodicElements.where((e)=>
+      e.name.toLowerCase().contains(query.toLowerCase()) ||
+      (elementEnglishNames[e.symbol]??'').toLowerCase().contains(query.toLowerCase()) ||
+      e.symbol.toLowerCase().contains(query.toLowerCase()) ||
+      e.number.toString()==query
+    ).toList();
+    return Scaffold(
+      appBar:AppBar(title:Text(_english?'Periodic table • 118 elements':'Tabela periódica • 118 elementos')),
+      body:Column(children:[
+        Padding(
+          padding:const EdgeInsets.all(12),
+          child:TextField(
+            controller:search,
+            onChanged:(v)=>setState(()=>query=v),
+            decoration:InputDecoration(
+              prefixIcon:const Icon(Icons.search),
+              hintText:_english?'Search element by name, symbol or Z':'Pesquisar elemento por nome, símbolo ou Z',
+              border:const OutlineInputBorder(),
+            ),
+          ),
+        ),
+        Expanded(
+          child:GridView.builder(
+            padding:const EdgeInsets.all(10),
+            itemCount:elements.length,
+            gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount:4,crossAxisSpacing:7,mainAxisSpacing:7,childAspectRatio:.95,
+            ),
+            itemBuilder:(context,i){
+              final e=elements[i];
+              return Card(
+                child:InkWell(
+                  onTap:()=>showDialog(
+                    context:context,
+                    builder:(_)=>AlertDialog(
+                      title:Text(e.symbol+' — '+_name(e)),
+                      content:Text(
+                        (_english?'Atomic number: ':'Número atómico: ')+e.number.toString()+
+                        '\n'+(_english?'Atomic mass: ':'Massa atómica: ')+e.atomicMass.toString()+' u'+
+                        '\n'+(_english?'Family: ':'Família: ')+_category(e.category),
+                      ),
+                      actions:[
+                        TextButton(onPressed:()=>Navigator.pop(context),child:Text(_english?'Close':'Fechar')),
+                      ],
+                    ),
+                  ),
+                  child:Padding(
+                    padding:const EdgeInsets.all(5),
+                    child:Column(
+                      mainAxisAlignment:MainAxisAlignment.center,
+                      children:[
+                        Text(e.number.toString(),style:const TextStyle(fontSize:10)),
+                        Text(e.symbol,style:const TextStyle(fontSize:23,fontWeight:FontWeight.bold,color:cyan)),
+                        Text(_name(e),textAlign:TextAlign.center,style:const TextStyle(fontSize:9),maxLines:2,overflow:TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ]),
+    );
   }
 }
 class ReactionScreen extends StatelessWidget {
