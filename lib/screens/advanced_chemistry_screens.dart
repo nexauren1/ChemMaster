@@ -398,6 +398,21 @@ class AtomicStructureScreen extends StatefulWidget {
 class _AtomicStructureScreenState extends State<AtomicStructureScreen> {
   ChemicalElement _selected = periodicElements.first;
   late final TextEditingController _massNumber;
+  bool get _english => isEnglish(context);
+
+  Future<void> _pickElement() async {
+    final item = await ChemicalPicker.show(
+      context,
+      mode: ChemicalPickerMode.elementsOnly,
+      title: _english ? 'Choose an element' : 'Escolher elemento',
+    );
+    if (!mounted || item == null) return;
+    final element = periodicElements.firstWhere((e) => e.symbol == item.elementSymbol);
+    setState(() {
+      _selected = element;
+      _massNumber.text = _suggestedMass(element).toString();
+    });
+  }
 
   int _suggestedMass(ChemicalElement element) {
     final rounded = element.atomicMass.round();
@@ -425,61 +440,63 @@ class _AtomicStructureScreenState extends State<AtomicStructureScreen> {
     final neutrons = validMass == null ? 0 : validMass - _selected.number;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Estrutura atómica')),
+      appBar: AppBar(title: Text(_english ? 'Atomic structure' : 'Estrutura atómica')),
       body: ListView(
         padding: const EdgeInsets.all(18),
         children: [
-          const Text(
-            'Escolhe um elemento e indica o número de massa A do isótopo. O app calcula Z, protões, neutrões e electrões.',
-            style: TextStyle(height: 1.45),
+          Text(
+            _english
+                ? 'Choose an element and enter the isotope mass number A. The app calculates Z, protons, neutrons and electrons.'
+                : 'Escolhe um elemento e indica o número de massa A do isótopo. O app calcula Z, protões, neutrões e electrões.',
+            style: const TextStyle(height: 1.45),
           ),
           const SizedBox(height: 14),
-          _ElementPicker(
-            selected: _selected,
-            onSelected: (element) => setState(() {
-              _selected = element;
-              _massNumber.text = _suggestedMass(element).toString();
-            }),
-          ),
+          _ElementPicker(selected: _selected, onTap: _pickElement),
           const SizedBox(height: 12),
           TextField(
             controller: _massNumber,
             keyboardType: TextInputType.number,
             onChanged: (_) => setState(() {}),
             decoration: const InputDecoration(
-              labelText: 'Número de massa (A)',
-              helperText: 'Exemplos: C-12, Na-23, Cl-35',
+              labelText: _english ? 'Mass number (A)' : 'Número de massa (A)',
+              helperText: _english ? 'Examples: C-12, Na-23, Cl-35' : 'Exemplos: C-12, Na-23, Cl-35',
               prefixIcon: Icon(Icons.numbers),
             ),
           ),
           const SizedBox(height: 16),
           if (validMass == null)
-            const Text(
-              'O número de massa A tem de ser um número inteiro igual ou superior ao número atómico Z.',
-              style: TextStyle(color: Colors.orange),
+            Text(
+              _english
+                  ? 'Mass number A must be an integer equal to or greater than atomic number Z.'
+                  : 'O número de massa A tem de ser um número inteiro igual ou superior ao número atómico Z.',
+              style: const TextStyle(color: Colors.orange),
             ),
           if (validMass != null) ...[
             Wrap(
               spacing: 9,
               runSpacing: 9,
               children: [
-                _NumberCard(label: 'Z • número atómico', value: _selected.number.toString(), icon: Icons.bubble_chart),
-                _NumberCard(label: 'A • número de massa', value: validMass.toString(), icon: Icons.scale),
-                _NumberCard(label: 'N • neutrões', value: neutrons.toString(), icon: Icons.grain),
-                _NumberCard(label: 'Protões', value: _selected.number.toString(), icon: Icons.add_circle_outline),
-                _NumberCard(label: 'Electrões', value: _selected.number.toString(), icon: Icons.electric_bolt),
+                _NumberCard(label: _english ? 'Z • atomic number' : 'Z • número atómico', value: _selected.number.toString(), icon: Icons.bubble_chart),
+                _NumberCard(label: _english ? 'A • mass number' : 'A • número de massa', value: validMass.toString(), icon: Icons.scale),
+                _NumberCard(label: _english ? 'N • neutrons' : 'N • neutrões', value: neutrons.toString(), icon: Icons.grain),
+                _NumberCard(label: _english ? 'Protons' : 'Protões', value: _selected.number.toString(), icon: Icons.add_circle_outline),
+                _NumberCard(label: _english ? 'Electrons' : 'Electrões', value: _selected.number.toString(), icon: Icons.electric_bolt),
               ],
             ),
             const SizedBox(height: 15),
             _InfoPanel(
-              title: 'Como se calcula?',
-              body: 'Z é o número de protões. A é a soma de protões e neutrões. Portanto, N = A − Z = ' + validMass.toString() + ' − ' + _selected.number.toString() + ' = ' + neutrons.toString() + '. Como estamos a considerar um átomo neutro, o número de electrões é igual a Z.',
+              title: _english ? 'How is it calculated?' : 'Como se calcula?',
+              body: _english
+                  ? 'Z is the number of protons. A is the sum of protons and neutrons. Therefore, N = A − Z = ' + validMass.toString() + ' − ' + _selected.number.toString() + ' = ' + neutrons.toString() + '. For a neutral atom, the number of electrons equals Z.'
+                  : 'Z é o número de protões. A é a soma de protões e neutrões. Portanto, N = A − Z = ' + validMass.toString() + ' − ' + _selected.number.toString() + ' = ' + neutrons.toString() + '. Como estamos a considerar um átomo neutro, o número de electrões é igual a Z.',
             ),
           ],
           const SizedBox(height: 12),
           const _InfoPanel(
-            title: 'Atenção aos isótopos',
-            body: 'O mesmo elemento pode ter vários isótopos. Todos têm o mesmo Z, mas podem ter valores diferentes de A e N. O valor inicial sugerido é apenas um isótopo representativo; confirma o isótopo pedido no exercício.',
+            title: _english ? 'About isotopes' : 'Atenção aos isótopos',
+            body: _english
+                ? 'The same element can have several isotopes. They all have the same Z but can have different A and N values. The suggested starting value is only a representative isotope; check which isotope your exercise asks for.'
+                : 'O mesmo elemento pode ter vários isótopos. Todos têm o mesmo Z, mas podem ter valores diferentes de A e N. O valor inicial sugerido é apenas um isótopo representativo; confirma o isótopo pedido no exercício.',
           ),
         ],
       ),
@@ -498,6 +515,18 @@ class ElectronDistributionScreen extends StatefulWidget {
 class _ElectronDistributionScreenState
     extends State<ElectronDistributionScreen> {
   ChemicalElement _selected = periodicElements.first;
+  bool get _english => isEnglish(context);
+
+  Future<void> _pickElement() async {
+    final item = await ChemicalPicker.show(
+      context,
+      mode: ChemicalPickerMode.elementsOnly,
+      title: _english ? 'Choose an element' : 'Escolher elemento',
+    );
+    if (!mounted || item == null) return;
+    final element = periodicElements.firstWhere((e) => e.symbol == item.elementSymbol);
+    setState(() => _selected = element);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -505,19 +534,18 @@ class _ElectronDistributionScreenState
         ElectronConfigurationCalculator.calculate(_selected.number);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Distribuição electrónica')),
+      appBar: AppBar(title: Text(_english ? 'Electron configuration' : 'Distribuição electrónica')),
       body: ListView(
         padding: const EdgeInsets.all(18),
         children: [
-          const Text(
-            'Escolhe um elemento. O ChemMaster usa o número atómico para calcular a configuração electrónica e a distribuição por camadas.',
-            style: TextStyle(height: 1.45),
+          Text(
+            _english
+                ? 'Choose an element. ChemMaster uses its atomic number to calculate the electron configuration and shell distribution.'
+                : 'Escolhe um elemento. O ChemMaster usa o número atómico para calcular a configuração electrónica e a distribuição por camadas.',
+            style: const TextStyle(height: 1.45),
           ),
           const SizedBox(height: 14),
-          _ElementPicker(
-            selected: _selected,
-            onSelected: (element) => setState(() => _selected = element),
-          ),
+          _ElementPicker(selected: _selected, onTap: _pickElement),
           const SizedBox(height: 14),
           Card(
             child: Padding(
@@ -526,19 +554,19 @@ class _ElectronDistributionScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _selected.symbol + ' • ' + _selected.name,
+                    _selected.symbol + ' • ' + (_english ? (elementEnglishNames[_selected.symbol] ?? _selected.name) : _selected.name),
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                   ),
-                  Text('Número atómico Z = ' + _selected.number.toString()),
+                  Text((_english ? 'Atomic number Z = ' : 'Número atómico Z = ') + _selected.number.toString()),
                   const SizedBox(height: 14),
-                  const Text('Configuração electrónica', style: TextStyle(fontWeight: FontWeight.w800)),
+                  Text(_english ? 'Electron configuration' : 'Configuração electrónica', style: const TextStyle(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 8),
                   SelectableText(
                     result.configuration,
                     style: const TextStyle(fontSize: 17, height: 1.65, color: _chemCyan),
                   ),
                   const Divider(height: 24),
-                  const Text('Distribuição por camadas', style: TextStyle(fontWeight: FontWeight.w800)),
+                  Text(_english ? 'Shell distribution' : 'Distribuição por camadas', style: const TextStyle(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 10),
                   Wrap(
                     spacing: 8,
@@ -550,13 +578,15 @@ class _ElectronDistributionScreenState
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Total de electrões: ' + result.totalElectrons.toString(),
+                    (_english ? 'Total electrons: ' : 'Total de electrões: ') + result.totalElectrons.toString(),
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   if (result.isApproximate) ...[
                     const SizedBox(height: 10),
                     const Text(
-                      'Nota: para este elemento pesado, a configuração é uma previsão pela regra de preenchimento e pode diferir de tabelas especializadas do estado fundamental.',
+                      _english
+                          ? 'Note: for this heavy element, the configuration is an Aufbau prediction and may differ from specialist ground-state reference tables.'
+                          : 'Nota: para este elemento pesado, a configuração é uma previsão pela regra de preenchimento e pode diferir de tabelas especializadas do estado fundamental.',
                       style: TextStyle(color: Colors.orange, fontSize: 12, height: 1.4),
                     ),
                   ],
@@ -566,13 +596,17 @@ class _ElectronDistributionScreenState
           ),
           const SizedBox(height: 12),
           const _InfoPanel(
-            title: 'Como o app chega à distribuição?',
-            body: '1. Num átomo neutro, o número de electrões é igual a Z. 2. Os electrões ocupam primeiro os subníveis de menor energia, seguindo a ordem de preenchimento ensinada pela regra de Aufbau. 3. Cada subnível tem uma capacidade máxima: s comporta 2, p comporta 6, d comporta 10 e f comporta 14 electrões. 4. A distribuição por camadas soma os electrões que têm o mesmo número quântico principal.',
+            title: _english ? 'How does the app calculate it?' : 'Como o app chega à distribuição?',
+            body: _english
+                ? '1. In a neutral atom, the number of electrons equals Z. 2. Electrons fill lower-energy subshells first, following the Aufbau order. 3. Each subshell has a maximum capacity: s holds 2, p holds 6, d holds 10 and f holds 14 electrons. 4. Shell distribution adds the electrons that share the same principal quantum number.'
+                : '1. Num átomo neutro, o número de electrões é igual a Z. 2. Os electrões ocupam primeiro os subníveis de menor energia, seguindo a ordem de preenchimento ensinada pela regra de Aufbau. 3. Cada subnível tem uma capacidade máxima: s comporta 2, p comporta 6, d comporta 10 e f comporta 14 electrões. 4. A distribuição por camadas soma os electrões que têm o mesmo número quântico principal.',
           ),
           const SizedBox(height: 8),
           const _InfoPanel(
-            title: 'Importante',
-            body: 'A configuração apresentada é para o átomo neutro. Iões têm outro número de electrões. Alguns elementos de transição e elementos pesados apresentam excepções à ordem simplificada; por isso, o app assinala os casos em que o resultado deve ser confirmado.',
+            title: _english ? 'Important' : 'Importante',
+            body: _english
+                ? 'The displayed configuration is for a neutral atom. Ions have different numbers of electrons. Some transition and heavy elements do not follow the simplified filling order; the app flags results that need confirmation.'
+                : 'A configuração apresentada é para o átomo neutro. Iões têm outro número de electrões. Alguns elementos de transição e elementos pesados apresentam excepções à ordem simplificada; por isso, o app assinala os casos em que o resultado deve ser confirmado.',
           ),
         ],
       ),
@@ -582,41 +616,34 @@ class _ElectronDistributionScreenState
 
 class _ElementPicker extends StatelessWidget {
   final ChemicalElement selected;
-  final ValueChanged<ChemicalElement> onSelected;
+  final VoidCallback onTap;
 
-  const _ElementPicker({
-    required this.selected,
-    required this.onSelected,
-  });
-
-  String _label(ChemicalElement element) =>
-      element.symbol + ' — ' + element.name + ' (Z=' + element.number.toString() + ')';
+  const _ElementPicker({required this.selected, required this.onTap});
 
   @override
-  Widget build(BuildContext context) => Autocomplete<ChemicalElement>(
-        initialValue: TextEditingValue(text: _label(selected)),
-        displayStringForOption: _label,
-        optionsBuilder: (value) {
-          final query = value.text.trim().toLowerCase();
-          if (query.isEmpty) return periodicElements.take(20);
-          return periodicElements.where((element) =>
-              element.name.toLowerCase().contains(query) ||
-              element.symbol.toLowerCase().contains(query) ||
-              element.number.toString() == query).take(20);
-        },
-        onSelected: onSelected,
-        fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) =>
-            TextField(
-          controller: controller,
-          focusNode: focusNode,
-          onSubmitted: (_) => onFieldSubmitted(),
-          decoration: const InputDecoration(
-            labelText: 'Pesquisar elemento',
-            hintText: 'Ex.: Carbono, C ou 6',
-            prefixIcon: Icon(Icons.search),
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return Card(
+      child: ListTile(
+        onTap: onTap,
+        leading: CircleAvatar(
+          backgroundColor: _chemBlue.withValues(alpha: .16),
+          child: Text(
+            selected.symbol,
+            style: const TextStyle(color: _chemCyan, fontWeight: FontWeight.w900),
           ),
         ),
-      );
+        title: Text(
+          english ? (elementEnglishNames[selected.symbol] ?? selected.name) : selected.name,
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
+        subtitle: Text(
+          (english ? 'Atomic number Z = ' : 'Número atómico Z = ') + selected.number.toString(),
+        ),
+        trailing: const Icon(Icons.expand_more),
+      ),
+    );
+  }
 }
 
 class _NumberCard extends StatelessWidget {
