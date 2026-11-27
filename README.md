@@ -64,7 +64,7 @@ Programme references:
 - 1st cycle: https://ieda.gov.mz/site/wp-content/uploads/2020/10/ANEXO_X_PROGRAMA_QUIMICA_ES_I_CICLO_GM_11_02_26_assinado.pdf
 - 2nd cycle: https://ieda.gov.mz/site/wp-content/uploads/2020/10/ANEXO_X_PROGRAMA_QUIMICA_ES_II_CICLO_GM_11_02_26_assinado.pdf
 
-The app currently contains 50 introductory lessons, 22 multiple-choice questions and a 34-term bilingual glossary across the six grades. This is a starting content set, not complete coverage of every learning objective, term or teaching-hour requirement in the official programme. Lesson material is newly written to support the curriculum topics; it is not a reproduction of the full official programme. Teachers should review and expand it before formal school adoption.
+The app currently contains 50 introductory lessons, 22 multiple-choice questions and a 35-term bilingual glossary across the six grades. This is a starting content set, not complete coverage of every learning objective, term or teaching-hour requirement in the official programme. Lesson material is newly written to support the curriculum topics; it is not a reproduction of the full official programme. Teachers should review and expand it before formal school adoption.
 
 ## Scientific scope and limitations
 
