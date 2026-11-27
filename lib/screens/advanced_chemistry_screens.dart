@@ -41,7 +41,7 @@ class _ProductDiscoveryScreenState extends State<ProductDiscoveryScreen> {
     final item = await ChemicalPicker.show(context);
     if (!mounted || item == null) return;
     setState(() {
-      if (!_reactants.any((existing) => existing.id == item.id)) {
+      if (!_reactants.any((existing) => formulaForReaction(existing) == formulaForReaction(item))) {
         _reactants.add(item);
       }
       _prediction = null;
