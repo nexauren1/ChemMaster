@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
-import 'chemistry/equation_balancer.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'core/chem_language.dart';
+import 'widgets/chemical_picker.dart';
+import 'screens/reaction_workbench.dart';
+import 'screens/glossary_screen.dart';
+import 'screens/advanced_chemistry_screens.dart';
 import 'chemistry/formula_parser.dart';
 import 'data/curriculum.dart';
 import 'data/periodic_elements.dart';
 import 'data/quiz_bank.dart';
+import 'data/curriculum_localization.dart';
+import 'data/quiz_bank_localization.dart';
 import 'services/progress_store.dart';
 
 void main() => runApp(const ChemMasterApp());
@@ -25,7 +33,34 @@ class ChemMasterApp extends StatefulWidget {
 }
 class _ChemMasterAppState extends State<ChemMasterApp> {
   bool dark=true;
+  String language='pt';
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      final saved = prefs.getString('chemmaster.language') ?? 'pt';
+      if (mounted && (saved == 'pt' || saved == 'en')) {
+        setState(() => language = saved);
+      }
+    });
+  }
+
+  Future<void> changeLanguage(String value) async {
+    if (value != 'pt' && value != 'en') return;
+    setState(() => language = value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('chemmaster.language', value);
+  }
+
   @override Widget build(BuildContext context)=>MaterialApp(
+    locale:Locale(language),
+    localizationsDelegates:const [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales:const [Locale('pt'),Locale('en')],
     debugShowCheckedModeBanner:false,title:'ChemMaster',
     theme:ThemeData(
       useMaterial3:true,
@@ -39,43 +74,115 @@ class _ChemMasterAppState extends State<ChemMasterApp> {
       navigationBarTheme:NavigationBarThemeData(backgroundColor:dark?const Color(0xFF071A3A):Colors.white,indicatorColor:cyan.withValues(alpha:.18),labelTextStyle:WidgetStateProperty.all(const TextStyle(fontSize:10,fontWeight:FontWeight.w700))),
       dividerColor:dark?cyan.withValues(alpha:.12):blue.withValues(alpha:.10),
     ),
-    home:AppShell(dark:dark,onTheme:()=>setState(()=>dark=!dark)));
+    home:AppShell(dark:dark,language:language,onTheme:()=>setState(()=>dark=!dark),onLanguage:changeLanguage));
 }
 class AppShell extends StatefulWidget {
-  final bool dark; final VoidCallback onTheme;
-  const AppShell({super.key,required this.dark,required this.onTheme});
+  final bool dark;
+  final String language;
+  final VoidCallback onTheme;
+  final ValueChanged<String> onLanguage;
+  const AppShell({
+    super.key,
+    required this.dark,
+    required this.language,
+    required this.onTheme,
+    required this.onLanguage,
+  });
   @override State<AppShell> createState()=>_AppShellState();
 }
 class _AppShellState extends State<AppShell> {
   int tab=0;
   @override Widget build(BuildContext context)=>Scaffold(
     body:SafeArea(child:IndexedStack(index:tab,children:[
-      HomeScreen(onTab:(v)=>setState(()=>tab=v)),
+      const HomeScreen(),
       const AcademyScreen(),const ToolsScreen(),const ProgressScreen(),
-      SettingsScreen(dark:widget.dark,onTheme:widget.onTheme)])),
-    bottomNavigationBar:NavigationBar(selectedIndex:tab,onDestinationSelected:(v)=>setState(()=>tab=v),destinations:const[
-      NavigationDestination(icon:Icon(Icons.home_outlined),label:'Início'),
-      NavigationDestination(icon:Icon(Icons.menu_book_outlined),label:'Academia'),
-      NavigationDestination(icon:Icon(Icons.science_outlined),label:'Ferramentas'),
-      NavigationDestination(icon:Icon(Icons.insights_outlined),label:'Progresso'),
-      NavigationDestination(icon:Icon(Icons.more_horiz),label:'Mais')]));
+      SettingsScreen(
+        dark:widget.dark,
+        language:widget.language,
+        onTheme:widget.onTheme,
+        onLanguage:widget.onLanguage,
+      )])),
+    bottomNavigationBar:NavigationBar(
+      selectedIndex:tab,
+      onDestinationSelected:(v)=>setState(()=>tab=v),
+      destinations:[
+        NavigationDestination(icon:const Icon(Icons.home_outlined),label:chemText(context,'Início','Home')),
+        NavigationDestination(icon:const Icon(Icons.menu_book_outlined),label:chemText(context,'Academia','Academy')),
+        NavigationDestination(icon:const Icon(Icons.science_outlined),label:chemText(context,'Laboratório','Lab')),
+        NavigationDestination(icon:const Icon(Icons.insights_outlined),label:chemText(context,'Progresso','Progress')),
+        NavigationDestination(icon:const Icon(Icons.more_horiz),label:chemText(context,'Mais','More')),
+      ],
+    ));
 }
 class HomeScreen extends StatelessWidget {
-  final ValueChanged<int> onTab; const HomeScreen({super.key,required this.onTab});
-  @override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(18),children:[
-    const Row(children:[CircleAvatar(radius:25,backgroundColor:blue,child:Icon(Icons.biotech,color:Colors.white,size:30)),SizedBox(width:12),
-      Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('ChemMaster',style:TextStyle(fontSize:25,fontWeight:FontWeight.w900)),Text('Aprender • Praticar • Conquistar',style:TextStyle(color:cyan))]))]),
-    const SizedBox(height:20),
-    Container(padding:const EdgeInsets.all(22),decoration:BoxDecoration(borderRadius:BorderRadius.circular(24),gradient:const LinearGradient(colors:[Color(0xFF0756C9),Color(0xFF32117D),Color(0xFF091B43)])),
-      child:const Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('A química começa aqui.',style:TextStyle(fontSize:23,fontWeight:FontWeight.bold)),SizedBox(height:8),Text('Aulas, exercícios e ferramentas para aprender química em qualquer lugar.'),SizedBox(height:12),Row(children:[Icon(Icons.offline_bolt,color:Colors.amber),SizedBox(width:8),Text('Conteúdos essenciais disponíveis offline')])])),
-    const SizedBox(height:20),const Text('Acesso rápido',style:TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
-    GridView.count(shrinkWrap:true,physics:const NeverScrollableScrollPhysics(),crossAxisCount:2,crossAxisSpacing:10,mainAxisSpacing:10,childAspectRatio:1.5,children:[
-      _HomeCard(icon:Icons.menu_book,title:'Academia',detail:'Classes e lições',onTap:()=>onTab(1)),
-      _HomeCard(icon:Icons.functions,title:'Equações',detail:'Balanceamento',onTap:()=>Navigator.push(context,neonRoute(const BalanceScreen()))),
-      _HomeCard(icon:Icons.calculate,title:'Calculadoras',detail:'Massa, mol e soluções',onTap:()=>Navigator.push(context,neonRoute(const CalculatorsScreen()))),
-      _HomeCard(icon:Icons.grid_on,title:'Tabela periódica',detail:'118 elementos',onTap:()=>Navigator.push(context,neonRoute(const PeriodicScreen()))) ]),
-    const SizedBox(height:12),Card(child:ListTile(leading:const Icon(Icons.quiz,color:cyan),title:const Text('Avaliar conhecimentos'),subtitle:const Text('Exercícios por classe'),trailing:const Icon(Icons.chevron_right),onTap:()=>Navigator.push(context,neonRoute(const QuizScreen()))))
-  ]);
+  const HomeScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return ListView(padding:const EdgeInsets.all(18),children:[
+      Row(children:[
+        const CircleAvatar(radius:25,backgroundColor:blue,child:Icon(Icons.biotech,color:Colors.white,size:30)),
+        const SizedBox(width:12),
+        Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+          const Text('ChemMaster',style:TextStyle(fontSize:25,fontWeight:FontWeight.w900)),
+          Text(english?'Learn • Explore • Understand':'Aprender • Explorar • Compreender',style:const TextStyle(color:cyan)),
+        ])),
+      ]),
+      const SizedBox(height:20),
+      Container(
+        padding:const EdgeInsets.all(22),
+        decoration:BoxDecoration(
+          borderRadius:BorderRadius.circular(24),
+          gradient:const LinearGradient(colors:[Color(0xFF0756C9),Color(0xFF32117D),Color(0xFF091B43)]),
+        ),
+        child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+          Text(english?'Chemistry, made clearer.':'Química, com mais clareza.',style:const TextStyle(fontSize:23,fontWeight:FontWeight.bold)),
+          const SizedBox(height:8),
+          Text(english
+            ?'Choose elements and substances, explore reactions and learn why the answers work.'
+            :'Escolhe elementos e substâncias, explora reacções e aprende por que razão as respostas funcionam.'),
+          const SizedBox(height:12),
+          Row(children:[
+            const Icon(Icons.offline_bolt,color:Colors.amber),
+            const SizedBox(width:8),
+            Text(english?'Core tools work offline':'Ferramentas essenciais funcionam offline'),
+          ]),
+        ]),
+      ),
+      const SizedBox(height:20),
+      Text(english?'Quick access':'Acesso rápido',style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+      const SizedBox(height:8),
+      GridView.count(
+        shrinkWrap:true,
+        physics:const NeverScrollableScrollPhysics(),
+        crossAxisCount:2,
+        crossAxisSpacing:10,
+        mainAxisSpacing:10,
+        childAspectRatio:1.42,
+        children:[
+          _HomeCard(icon:Icons.auto_awesome,title:english?'Discover products':'Descobrir produtos',detail:english?'Choose reactants':'Escolher reagentes',onTap:()=>Navigator.push(context,neonRoute(const ProductDiscoveryScreen()))),
+          _HomeCard(icon:Icons.functions,title:english?'Balance equation':'Equilibrar equação',detail:english?'Build both sides':'Construir os dois lados',onTap:()=>Navigator.push(context,neonRoute(const BalanceScreen()))),
+          _HomeCard(icon:Icons.hub,title:english?'Atomic structure':'Estrutura atómica',detail:english?'Calculate Z, A and N':'Calcular Z, A e N',onTap:()=>Navigator.push(context,neonRoute(const AtomicStructureScreen()))),
+          _HomeCard(icon:Icons.electric_bolt,title:english?'Electron configuration':'Distribuição electrónica',detail:english?'Shells and subshells':'Camadas e subníveis',onTap:()=>Navigator.push(context,neonRoute(const ElectronDistributionScreen()))),
+        ],
+      ),
+      const SizedBox(height:12),
+      Card(child:ListTile(
+        leading:const Icon(Icons.grid_on,color:cyan),
+        title:Text(english?'Explore the periodic table':'Explorar a tabela periódica'),
+        subtitle:Text(english?'118 elements, organized by family':'118 elementos, organizados por família'),
+        trailing:const Icon(Icons.chevron_right),
+        onTap:()=>Navigator.push(context,neonRoute(const PeriodicScreen())),
+      )),
+      Card(child:ListTile(
+        leading:const Icon(Icons.calculate,color:cyan),
+        title:Text(english?'Chemistry calculators':'Calculadoras de Química'),
+        subtitle:Text(english?'Moles, molar mass and solutions':'Moles, massa molar e soluções'),
+        trailing:const Icon(Icons.chevron_right),
+        onTap:()=>Navigator.push(context,neonRoute(const CalculatorsScreen())),
+      )),
+    ]);
+  }
 }
 class _HomeCard extends StatelessWidget {
   final IconData icon;final String title,detail;final VoidCallback onTap;
@@ -99,51 +206,155 @@ class _HomeCard extends StatelessWidget {
   );
 }
 
-class AcademyScreen extends StatefulWidget {const AcademyScreen({super.key});@override State<AcademyScreen> createState()=>_AcademyScreenState();}
+class AcademyScreen extends StatefulWidget {
+  const AcademyScreen({super.key});
+  @override State<AcademyScreen> createState()=>_AcademyScreenState();
+}
 class _AcademyScreenState extends State<AcademyScreen> {
   String grade='7.ª classe';
-  @override Widget build(BuildContext context){
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
     final selected=mozambiqueCurriculum.firstWhere((c)=>c.grade==grade);
     return ListView(padding:const EdgeInsets.all(18),children:[
-      const Text('Academia',style:TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
-      const Text('Programa de Química • 7.ª à 12.ª classe • Moçambique'),
+      Text(english?'Academy':'Academia',style:const TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
+      Text(english
+        ?'Mozambique secondary Chemistry curriculum • grades 7–12'
+        :'Programa de Química • 7.ª à 12.ª classe • Moçambique'),
       const SizedBox(height:12),
-      Wrap(spacing:7,children:mozambiqueCurriculum.map((c)=>ChoiceChip(label:Text(c.grade),selected:grade==c.grade,onSelected:(_)=>setState(()=>grade=c.grade))).toList()),
+      Wrap(
+        spacing:7,
+        children:mozambiqueCurriculum.map((c)=>ChoiceChip(
+          label:Text(localizedGrade(c.grade,english)),
+          selected:grade==c.grade,
+          onSelected:(_)=>setState(()=>grade=c.grade),
+        )).toList(),
+      ),
       const SizedBox(height:12),
-      ...selected.units.map((u)=>Card(child:ExpansionTile(
-        leading:const Icon(Icons.menu_book,color:cyan),title:Text(u.title,style:const TextStyle(fontWeight:FontWeight.bold)),
-        subtitle:Text('${u.lessons.length} lições'),
-        children:u.lessons.map((l)=>ListTile(
-          title:Text(l.title),subtitle:Text(l.summary,maxLines:2,overflow:TextOverflow.ellipsis),
-          trailing:const Icon(Icons.arrow_forward_ios,size:15),
-          onTap:()=>Navigator.push(context,neonRoute(LessonScreen(lesson:l,grade:grade))))).toList()))),
-      const SizedBox(height:8),const Text('Conteúdos introdutórios organizados para as seis classes. A cobertura detalhada será ampliada e revista continuamente.',style:TextStyle(fontSize:12,color:Colors.amber))
+      ...selected.units.map((unit)=>Card(
+        child:ExpansionTile(
+          leading:const Icon(Icons.menu_book,color:cyan),
+          title:Text(localizedUnitTitle(unit.title,english),style:const TextStyle(fontWeight:FontWeight.bold)),
+          subtitle:Text(unit.lessons.length.toString()+(english?' lessons':' lições')),
+          children:unit.lessons.map((lesson)=>ListTile(
+            title:Text(localizedLessonTitle(lesson,english)),
+            subtitle:Text(localizedLessonSummary(lesson,english),maxLines:2,overflow:TextOverflow.ellipsis),
+            trailing:const Icon(Icons.arrow_forward_ios,size:15),
+            onTap:()=>Navigator.push(context,neonRoute(LessonScreen(lesson:lesson,grade:grade))),
+          )).toList(),
+        ),
+      )),
+      const SizedBox(height:8),
+      Text(
+        english
+          ?'Introductory lessons are organised across all six grades. Detailed coverage is expanded and reviewed continuously.'
+          :'Conteúdos introdutórios organizados para as seis classes. A cobertura detalhada será ampliada e revista continuamente.',
+        style:const TextStyle(fontSize:12,color:Colors.amber),
+      ),
     ]);
   }
 }
 class LessonScreen extends StatelessWidget {
-  final Lesson lesson;final String grade;
+  final Lesson lesson;
+  final String grade;
   const LessonScreen({super.key,required this.lesson,required this.grade});
-  @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:Text(lesson.title)),body:ListView(padding:const EdgeInsets.all(18),children:[
-    Text(grade,style:const TextStyle(color:cyan,fontWeight:FontWeight.bold)),
-    Text(lesson.summary,style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
-    const SizedBox(height:14),Card(child:Padding(padding:const EdgeInsets.all(16),child:Text(lesson.body,style:const TextStyle(fontSize:16,height:1.5)))),
-    ExpansionTile(title:const Text('Exemplo explicado'),leading:const Icon(Icons.lightbulb_outline,color:Colors.orange),children:[Padding(padding:const EdgeInsets.all(16),child:Text(lesson.example))]),
-    const SizedBox(height:16),FilledButton.icon(onPressed:()async{await ProgressStore.completeLesson(lesson.id);if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Lição marcada como concluída.')));},icon:const Icon(Icons.check),label:const Text('Marcar como concluída'))
-  ]));
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return Scaffold(
+      appBar:AppBar(title:Text(localizedLessonTitle(lesson,english))),
+      body:ListView(padding:const EdgeInsets.all(18),children:[
+        Text(localizedGrade(grade,english),style:const TextStyle(color:cyan,fontWeight:FontWeight.bold)),
+        Text(localizedLessonSummary(lesson,english),style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+        const SizedBox(height:14),
+        Card(child:Padding(
+          padding:const EdgeInsets.all(16),
+          child:Text(localizedLessonBody(lesson,english),style:const TextStyle(fontSize:16,height:1.5)),
+        )),
+        ExpansionTile(
+          title:Text(english?'Worked example':'Exemplo explicado'),
+          leading:const Icon(Icons.lightbulb_outline,color:Colors.orange),
+          children:[
+            Padding(
+              padding:const EdgeInsets.all(16),
+              child:Text(localizedLessonExample(lesson,english)),
+            ),
+          ],
+        ),
+        const SizedBox(height:16),
+        FilledButton.icon(
+          onPressed:()async{
+            await ProgressStore.completeLesson(lesson.id);
+            if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content:Text(english?'Lesson marked as completed.':'Lição marcada como concluída.')),
+            );
+          },
+          icon:const Icon(Icons.check),
+          label:Text(english?'Mark as completed':'Marcar como concluída'),
+        ),
+      ]),
+    );
+  }
 }
-
 class ToolsScreen extends StatelessWidget {
   const ToolsScreen({super.key});
-  @override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(18),children:[
-    const Text('Ferramentas',style:TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
-    _ToolTile('Balancear equações','Equações com grupos e parênteses',Icons.functions,const BalanceScreen()),
-    _ToolTile('Calculadoras químicas','Massa molar, mol, concentração, densidade e diluição',Icons.calculate,const CalculatorsScreen()),
-    _ToolTile('Tabela periódica','Pesquisa dos 118 elementos',Icons.grid_on,const PeriodicScreen()),
-    _ToolTile('Tipos de reacções','Síntese, decomposição, deslocamento, dupla troca e neutralização',Icons.sync_alt,const ReactionScreen()),
-    _ToolTile('Nomenclatura','Óxidos, ácidos, bases e sais',Icons.spellcheck,const NomenclatureScreen()),
-    _ToolTile('Testes e exercícios','Questionário de conhecimentos',Icons.quiz,const QuizScreen()),
-  ]);
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return ListView(padding:const EdgeInsets.all(18),children:[
+      Text(english?'Chemistry lab':'Laboratório de Química',style:const TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
+      Text(english
+        ?'A practical toolbox for solving, exploring and understanding chemistry.'
+        :'Um conjunto de ferramentas para resolver, explorar e compreender Química.'),
+      const SizedBox(height:18),
+      _LabSection(
+        title:english?'REACTIONS & EQUATIONS':'REACÇÕES E EQUAÇÕES',
+        children:[
+          _ToolTile(english?'Discover products':'Descobrir produtos',english?'Choose reactants from the catalog':'Escolhe reagentes no catálogo',Icons.auto_awesome,const ProductDiscoveryScreen()),
+          _ToolTile(english?'Build and balance an equation':'Construir e equilibrar equação',english?'Choose substances on both sides':'Escolhe substâncias nos dois lados',Icons.functions,const BalanceScreen()),
+          _ToolTile(english?'Reaction types':'Tipos de reacções',english?'Synthesis, decomposition, acid-base and more':'Síntese, decomposição, ácido-base e mais',Icons.sync_alt,const ReactionScreen()),
+        ],
+      ),
+      _LabSection(
+        title:english?'ELEMENTS & ATOMS':'ELEMENTOS E ÁTOMOS',
+        children:[
+          _ToolTile(english?'Periodic table':'Tabela periódica',english?'118 elements by family':'118 elementos por família',Icons.grid_on,const PeriodicScreen()),
+          _ToolTile(english?'Atomic structure':'Estrutura atómica',english?'Calculate Z, A, neutrons and particles':'Calcular Z, A, neutrões e partículas',Icons.hub,const AtomicStructureScreen()),
+          _ToolTile(english?'Electron configuration':'Distribuição electrónica',english?'Electron configuration and shells':'Configuração electrónica e camadas',Icons.electric_bolt,const ElectronDistributionScreen()),
+        ],
+      ),
+      _LabSection(
+        title:english?'CALCULATIONS & SOLUTIONS':'CÁLCULOS E SOLUÇÕES',
+        children:[
+          _ToolTile(english?'Chemistry calculators':'Calculadoras químicas',english?'Molar mass, moles, concentration, density and dilution':'Massa molar, mol, concentração, densidade e diluição',Icons.calculate,const CalculatorsScreen()),
+        ],
+      ),
+      _LabSection(
+        title:english?'LEARN & PRACTISE':'APRENDER E PRATICAR',
+        children:[
+          _ToolTile(english?'Nomenclature':'Nomenclatura',english?'Oxides, acids, bases and salts':'Óxidos, ácidos, bases e sais',Icons.spellcheck,const NomenclatureScreen()),
+          _ToolTile(english?'Exercises and tests':'Exercícios e testes',english?'Check knowledge and see explanations':'Avaliar conhecimentos e ver explicações',Icons.quiz,const QuizScreen()),
+          _ToolTile(english?'Chemistry glossary':'Glossário de Química',english?'Search important terms and examples':'Pesquisar termos e exemplos importantes',Icons.menu_book,const GlossaryScreen()),
+        ],
+      ),
+    ]);
+  }
+}
+class _LabSection extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+  const _LabSection({required this.title,required this.children});
+  @override
+  Widget build(BuildContext context)=>Padding(
+    padding:const EdgeInsets.only(top:10,bottom:9),
+    child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+      Padding(
+        padding:const EdgeInsets.only(left:4,bottom:6),
+        child:Text(title,style:const TextStyle(fontSize:11,letterSpacing:1.2,fontWeight:FontWeight.w900,color:cyan)),
+      ),
+      Card(child:Column(children:children)),
+    ]),
+  );
 }
 class _ToolTile extends StatelessWidget {
   final String title,detail;final IconData icon;final Widget page;
@@ -151,32 +362,46 @@ class _ToolTile extends StatelessWidget {
   @override Widget build(BuildContext context)=>Card(child:ListTile(leading:Icon(icon,color:cyan,size:28),title:Text(title),subtitle:Text(detail),trailing:const Icon(Icons.chevron_right),onTap:()=>Navigator.push(context,neonRoute(page))));
 }
 
-class BalanceScreen extends StatefulWidget {const BalanceScreen({super.key});@override State<BalanceScreen> createState()=>_BalanceScreenState();}
-class _BalanceScreenState extends State<BalanceScreen>{
-  final input=TextEditingController(text:'HCl + KOH -> KCl + H2O');String result='',error='';
-  void solve(){try{final value=EquationBalancer.balance(input.text);setState(() { result=value; error=''; });}catch(e){setState(() { result=''; error=e.toString(); });}}
-  @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Balancear equações')),body:ListView(padding:const EdgeInsets.all(18),children:[
-    const Text('Escreve a equação sem alterar os índices das fórmulas.',style:TextStyle(fontSize:16)),
-    const SizedBox(height:12),TextField(controller:input,decoration:const InputDecoration(border:OutlineInputBorder(),labelText:'Ex.: H2 + O2 -> H2O')),
-    const SizedBox(height:12),FilledButton.icon(onPressed:solve,icon:const Icon(Icons.auto_fix_high),label:const Text('Balancear')),
-    if(result.isNotEmpty)Card(child:Padding(padding:const EdgeInsets.all(18),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('Equação balanceada',style:TextStyle(color:cyan)),const SizedBox(height:8),SelectableText(result,style:const TextStyle(fontSize:22,fontWeight:FontWeight.bold)),const Text('Os átomos de cada elemento estão conservados.')]))),
-    if(error.isNotEmpty)Text(error,style:const TextStyle(color:Colors.redAccent)),
-    const SizedBox(height:8),const Text('Suporta fórmulas com parênteses, como Ca(OH)2. Para reacções iónicas/redox complexas, o balanceamento ainda requer validação adicional.',style:TextStyle(fontSize:12,color:Colors.amber))
-  ]));
+class BalanceScreen extends StatelessWidget {
+  const BalanceScreen({super.key});
+  @override
+  Widget build(BuildContext context) => const EquationBuilderScreen();
 }
 
 class CalculatorsScreen extends StatefulWidget {const CalculatorsScreen({super.key});@override State<CalculatorsScreen> createState()=>_CalculatorsScreenState();}
 class _CalculatorsScreenState extends State<CalculatorsScreen>{
   final formula=TextEditingController(text:'H2SO4'),mass=TextEditingController(text:'10'),molar=TextEditingController(text:'98.08'),moles=TextEditingController(text:'0.5'),volume=TextEditingController(text:'2'),densityMass=TextEditingController(text:'20'),densityVolume=TextEditingController(text:'5'),solute=TextEditingController(text:'10'),solution=TextEditingController(text:'100'),c1=TextEditingController(text:'2'),v1=TextEditingController(text:'50'),v2=TextEditingController(text:'100');
   String r0='—',r1='—',r2='—',r3='—',r4='—',r5='—';
+  bool get _english => isEnglish(context);
+
+  Future<void> _selectFormula() async {
+    final item = await ChemicalPicker.show(
+      context,
+      mode: ChemicalPickerMode.all,
+      title: _english ? 'Choose an element or compound' : 'Escolher elemento ou composto',
+    );
+    if (!mounted || item == null) return;
+    setState(() => formula.text = item.formula);
+  }
+
+  Widget _formulaSelector() => OutlinedButton.icon(
+    onPressed: _selectFormula,
+    icon: const Icon(Icons.search),
+    label: Text(
+      (_english ? 'Choose formula: ' : 'Escolher fórmula: ') + prettyFormula(formula.text),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    ),
+    style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+  );
   static final weights={for(final e in periodicElements)e.symbol:e.atomicMass};
-  void safe(void Function() fn){try{setState(fn);}catch(e){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.toString())));}}
+  void safe(void Function() fn){try{setState(fn);}catch(e){ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(_english?'Check the values and selected formula, then try again.':e.toString())));}}
   void calcMass(){
     safe(() {
       final atoms=FormulaParser.parse(formula.text);
       final total=atoms.entries.fold<double>(0.0,(sum,entry) {
         final atomicMass=weights[entry.key];
-        if(atomicMass==null)throw FormatException('Massa atómica não disponível: ${entry.key}');
+        if(atomicMass==null)throw FormatException((_english?'Atomic mass unavailable: ':'Massa atómica não disponível: ')+entry.key);
         return (sum+atomicMass*entry.value).toDouble();
       });
       r0='${total.toStringAsFixed(3)} g/mol';
@@ -192,51 +417,176 @@ class _CalculatorsScreenState extends State<CalculatorsScreen>{
   Widget field(TextEditingController c,String label)=>TextField(controller:c,keyboardType:const TextInputType.numberWithOptions(decimal:true),decoration:dec(label));
   Widget panel(String title,String formulaText,List<Widget> children)=>ListView(padding:const EdgeInsets.all(16),children:[Text(title,style:const TextStyle(fontSize:18,fontWeight:FontWeight.bold)),Text(formulaText,style:const TextStyle(color:cyan)),const SizedBox(height:12),...children]);
   Widget result(String s)=>Card(child:Padding(padding:const EdgeInsets.all(16),child:Text(s,style:const TextStyle(fontSize:23,fontWeight:FontWeight.bold,color:cyan))));
-  @override Widget build(BuildContext context)=>DefaultTabController(length:6,child:Scaffold(appBar:AppBar(title:const Text('Calculadoras químicas'),bottom:const TabBar(isScrollable:true,tabs:[Tab(text:'Massa molar'),Tab(text:'Mol'),Tab(text:'Concentração'),Tab(text:'Densidade'),Tab(text:'Percentagem'),Tab(text:'Diluição')])),body:TabBarView(children:[
-    panel('Massa molar','M = soma das massas atómicas', [field(formula,'Fórmula química'),FilledButton(onPressed:calcMass,child:const Text('Calcular')),result(r0)]),
-    panel('Quantidade de matéria','n = m / M', [field(mass,'Massa (g)'),field(molar,'Massa molar (g/mol)'),FilledButton(onPressed:calcMol,child:const Text('Calcular')),result(r1)]),
-    panel('Concentração molar','C = n / V', [field(moles,'Quantidade (mol)'),field(volume,'Volume (L)'),FilledButton(onPressed:calcConc,child:const Text('Calcular')),result(r2)]),
-    panel('Densidade','d = m / V', [field(densityMass,'Massa (g)'),field(densityVolume,'Volume (mL)'),FilledButton(onPressed:calcDensity,child:const Text('Calcular')),result(r3)]),
-    panel('Concentração percentual em massa','% m/m = massa do soluto / massa da solução × 100', [field(solute,'Massa do soluto (g)'),field(solution,'Massa da solução (g)'),FilledButton(onPressed:calcPercent,child:const Text('Calcular')),result(r4)]),
-    panel('Diluição','C1 × V1 = C2 × V2', [field(c1,'Concentração inicial (mol/L)'),field(v1,'Volume inicial (mL)'),field(v2,'Volume final (mL)'),FilledButton(onPressed:calcDilution,child:const Text('Calcular concentração final')),result(r5)])
+  @override
+  void dispose() {
+    for (final controller in [
+      formula,mass,molar,moles,volume,densityMass,densityVolume,
+      solute,solution,c1,v1,v2,
+    ]) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override Widget build(BuildContext context)=>DefaultTabController(length:6,child:Scaffold(appBar:AppBar(title:Text(_english?'Chemistry calculators':'Calculadoras químicas'),bottom:TabBar(isScrollable:true,tabs:[
+    Tab(text:_english?'Molar mass':'Massa molar'),
+    const Tab(text:'Mol'),
+    Tab(text:_english?'Concentration':'Concentração'),
+    Tab(text:_english?'Density':'Densidade'),
+    Tab(text:_english?'Percentage':'Percentagem'),
+    Tab(text:_english?'Dilution':'Diluição')
+  ])),body:TabBarView(children:[
+    panel(_english?'Molar mass':'Massa molar','M = Σ atomic masses', [_formulaSelector(),FilledButton(onPressed:calcMass,child:Text(_english?'Calculate':'Calcular')),result(r0)]),
+    panel(_english?'Amount of substance':'Quantidade de matéria','n = m / M', [field(mass,_english?'Mass (g)':'Massa (g)'),field(molar,_english?'Molar mass (g/mol)':'Massa molar (g/mol)'),FilledButton(onPressed:calcMol,child:Text(_english?'Calculate':'Calcular')),result(r1)]),
+    panel(_english?'Molar concentration':'Concentração molar','C = n / V', [field(moles,_english?'Amount (mol)':'Quantidade (mol)'),field(volume,_english?'Volume (L)':'Volume (L)'),FilledButton(onPressed:calcConc,child:Text(_english?'Calculate':'Calcular')),result(r2)]),
+    panel(_english?'Density':'Densidade','d = m / V', [field(densityMass,_english?'Mass (g)':'Massa (g)'),field(densityVolume,_english?'Volume (mL)':'Volume (mL)'),FilledButton(onPressed:calcDensity,child:Text(_english?'Calculate':'Calcular')),result(r3)]),
+    panel(_english?'Mass percentage concentration':'Concentração percentual em massa','% m/m = solute mass / solution mass × 100', [field(solute,_english?'Solute mass (g)':'Massa do soluto (g)'),field(solution,_english?'Solution mass (g)':'Massa da solução (g)'),FilledButton(onPressed:calcPercent,child:Text(_english?'Calculate':'Calcular')),result(r4)]),
+    panel(_english?'Dilution':'Diluição','C1 × V1 = C2 × V2', [field(c1,_english?'Initial concentration (mol/L)':'Concentração inicial (mol/L)'),field(v1,_english?'Initial volume (mL)':'Volume inicial (mL)'),field(v2,_english?'Final volume (mL)':'Volume final (mL)'),FilledButton(onPressed:calcDilution,child:Text(_english?'Calculate final concentration':'Calcular concentração final')),result(r5)])
   ])));
 }
 
-class PeriodicScreen extends StatefulWidget {const PeriodicScreen({super.key});@override State<PeriodicScreen> createState()=>_PeriodicScreenState();}
+class PeriodicScreen extends StatefulWidget {
+  const PeriodicScreen({super.key});
+  @override State<PeriodicScreen> createState()=>_PeriodicScreenState();
+}
 class _PeriodicScreenState extends State<PeriodicScreen>{
-  final search=TextEditingController();String query='';
-  @override Widget build(BuildContext context){
-    final elements=periodicElements.where((e)=>e.name.toLowerCase().contains(query.toLowerCase())||e.symbol.toLowerCase().contains(query.toLowerCase())||e.number.toString()==query).toList();
-    return Scaffold(appBar:AppBar(title:const Text('Tabela periódica — 118 elementos')),body:Column(children:[
-      Padding(padding:const EdgeInsets.all(12),child:TextField(controller:search,onChanged:(v)=>setState(()=>query=v),decoration:const InputDecoration(prefixIcon:Icon(Icons.search),hintText:'Pesquisar elemento ou símbolo',border:OutlineInputBorder()))),
-      Expanded(child:GridView.builder(padding:const EdgeInsets.all(10),itemCount:elements.length,gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:4,crossAxisSpacing:7,mainAxisSpacing:7,childAspectRatio:.95),itemBuilder:(context,i){final e=elements[i];return Card(child:InkWell(onTap:()=>showDialog(context:context,builder:(_)=>AlertDialog(title:Text('${e.symbol} — ${e.name}'),content:Text('Número atómico: ${e.number}\nMassa atómica: ${e.atomicMass} u\nClassificação: ${e.category}'))),child:Padding(padding:const EdgeInsets.all(5),child:Column(mainAxisAlignment:MainAxisAlignment.center,children:[Text('${e.number}',style:const TextStyle(fontSize:10)),Text(e.symbol,style:const TextStyle(fontSize:23,fontWeight:FontWeight.bold,color:cyan)),Text(e.name,textAlign:TextAlign.center,style:const TextStyle(fontSize:9),maxLines:2,overflow:TextOverflow.ellipsis)]))));}))
-    ]));
+  final search=TextEditingController();
+  String query='';
+  bool get _english=>isEnglish(context);
+
+  @override
+  void dispose() {
+    search.dispose();
+    super.dispose();
+  }
+
+  String _name(ChemicalElement element) =>
+      _english ? (elementEnglishNames[element.symbol] ?? element.name) : element.name;
+
+  String _category(String category) {
+    if (!_english) return category;
+    const names={
+      'Não metal':'Nonmetal',
+      'Gás nobre':'Noble gas',
+      'Metal alcalino':'Alkali metal',
+      'Metal alcalino-terroso':'Alkaline earth metal',
+      'Semimetal':'Metalloid',
+      'Halogéneo':'Halogen',
+      'Metal de transição':'Transition metal',
+      'Metal pós-transição':'Post-transition metal',
+      'Lantanídeo':'Lanthanide',
+      'Actinídeo':'Actinide',
+    };
+    return names[category]??category;
+  }
+
+  @override
+  Widget build(BuildContext context){
+    final elements=periodicElements.where((e)=>
+      e.name.toLowerCase().contains(query.toLowerCase()) ||
+      (elementEnglishNames[e.symbol]??'').toLowerCase().contains(query.toLowerCase()) ||
+      e.symbol.toLowerCase().contains(query.toLowerCase()) ||
+      e.number.toString()==query
+    ).toList();
+    return Scaffold(
+      appBar:AppBar(title:Text(_english?'Periodic table • 118 elements':'Tabela periódica • 118 elementos')),
+      body:Column(children:[
+        Padding(
+          padding:const EdgeInsets.all(12),
+          child:TextField(
+            controller:search,
+            onChanged:(v)=>setState(()=>query=v),
+            decoration:InputDecoration(
+              prefixIcon:const Icon(Icons.search),
+              hintText:_english?'Search element by name, symbol or Z':'Pesquisar elemento por nome, símbolo ou Z',
+              border:const OutlineInputBorder(),
+            ),
+          ),
+        ),
+        Expanded(
+          child:GridView.builder(
+            padding:const EdgeInsets.all(10),
+            itemCount:elements.length,
+            gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount:4,crossAxisSpacing:7,mainAxisSpacing:7,childAspectRatio:.95,
+            ),
+            itemBuilder:(context,i){
+              final e=elements[i];
+              return Card(
+                child:InkWell(
+                  onTap:()=>showDialog(
+                    context:context,
+                    builder:(_)=>AlertDialog(
+                      title:Text(e.symbol+' — '+_name(e)),
+                      content:Text(
+                        (_english?'Atomic number: ':'Número atómico: ')+e.number.toString()+
+                        '\n'+(_english?'Atomic mass: ':'Massa atómica: ')+e.atomicMass.toString()+' u'+
+                        '\n'+(_english?'Family: ':'Família: ')+_category(e.category),
+                      ),
+                      actions:[
+                        TextButton(onPressed:()=>Navigator.pop(context),child:Text(_english?'Close':'Fechar')),
+                      ],
+                    ),
+                  ),
+                  child:Padding(
+                    padding:const EdgeInsets.all(5),
+                    child:Column(
+                      mainAxisAlignment:MainAxisAlignment.center,
+                      children:[
+                        Text(e.number.toString(),style:const TextStyle(fontSize:10)),
+                        Text(e.symbol,style:const TextStyle(fontSize:23,fontWeight:FontWeight.bold,color:cyan)),
+                        Text(_name(e),textAlign:TextAlign.center,style:const TextStyle(fontSize:9),maxLines:2,overflow:TextOverflow.ellipsis),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ]),
+    );
   }
 }
 class ReactionScreen extends StatelessWidget {
   const ReactionScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    const rows=[
-      ('Síntese','A + B → AB','2H₂ + O₂ → 2H₂O'),
-      ('Decomposição','AB → A + B','2H₂O₂ → 2H₂O + O₂'),
-      ('Deslocamento simples','A + BC → AC + B','Zn + 2HCl → ZnCl₂ + H₂'),
-      ('Dupla troca','AB + CD → AD + CB','AgNO₃ + NaCl → AgCl + NaNO₃'),
-      ('Neutralização','Ácido + Base → Sal + Água','HCl + KOH → KCl + H₂O')
-    ];
+    final english = isEnglish(context);
+    final rows = english
+      ?[
+        ('Synthesis','A + B → AB','2H₂ + O₂ → 2H₂O','Two or more reactants combine to form one product.'),
+        ('Decomposition','AB → A + B','2H₂O₂ → 2H₂O + O₂','One compound breaks into simpler substances.'),
+        ('Single displacement','A + BC → AC + B','Zn + 2HCl → ZnCl₂ + H₂','A more reactive element replaces another in a compound.'),
+        ('Double displacement','AB + CD → AD + CB','AgNO₃ + NaCl → AgCl + NaNO₃','Ions exchange partners; a precipitate may form.'),
+        ('Neutralization','Acid + Base → Salt + Water','HCl + KOH → KCl + H₂O','An acid and a base react to form water and a salt.'),
+      ]
+      :[
+        ('Síntese','A + B → AB','2H₂ + O₂ → 2H₂O','Duas ou mais substâncias combinam-se para formar um produto.'),
+        ('Decomposição','AB → A + B','2H₂O₂ → 2H₂O + O₂','Um composto divide-se em substâncias mais simples.'),
+        ('Deslocamento simples','A + BC → AC + B','Zn + 2HCl → ZnCl₂ + H₂','Um elemento mais reactivo substitui outro num composto.'),
+        ('Dupla troca','AB + CD → AD + CB','AgNO₃ + NaCl → AgCl + NaNO₃','Os iões trocam parceiros; pode formar-se um precipitado.'),
+        ('Neutralização','Ácido + Base → Sal + Água','HCl + KOH → KCl + H₂O','Um ácido e uma base reagem e formam água e um sal.'),
+      ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Tipos de reacções')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: rows.map((r) => Card(
-          child: ExpansionTile(
-            title: Text(r.$1),
-            subtitle: Text(r.$2),
-            leading: const Icon(Icons.science, color: cyan),
-            children: [Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text('Exemplo: ${r.$3}'),
-            )],
+      appBar:AppBar(title:Text(english?'Reaction types':'Tipos de reacções')),
+      body:ListView(
+        padding:const EdgeInsets.all(16),
+        children:rows.map((r)=>Card(
+          child:ExpansionTile(
+            title:Text(r.$1),
+            subtitle:Text(r.$2),
+            leading:const Icon(Icons.science,color:cyan),
+            children:[
+              Padding(
+                padding:const EdgeInsets.fromLTRB(16,0,16,8),
+                child:Text((english?'Example: ':'Exemplo: ')+r.$3,style:const TextStyle(fontWeight:FontWeight.w800)),
+              ),
+              Padding(
+                padding:const EdgeInsets.fromLTRB(16,0,16,16),
+                child:Text(r.$4,style:const TextStyle(height:1.4)),
+              ),
+            ],
           ),
         )).toList(),
       ),
@@ -245,12 +595,43 @@ class ReactionScreen extends StatelessWidget {
 }
 class NomenclatureScreen extends StatelessWidget {
   const NomenclatureScreen({super.key});
-  @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Nomenclatura química')),body:ListView(padding:const EdgeInsets.all(16),children:const[
-    _NameCard('Óxidos','Compostos binários do oxigénio com outro elemento.',['CO2 — dióxido de carbono','SO3 — trióxido de enxofre','Fe2O3 — óxido de ferro (III)']),
-    _NameCard('Ácidos','Em solução aquosa, aumentam a concentração de H3O+.',['HCl — ácido clorídrico','H2SO4 — ácido sulfúrico','HNO3 — ácido nítrico']),
-    _NameCard('Bases','Incluem hidróxidos que podem fornecer OH− em água.',['NaOH — hidróxido de sódio','KOH — hidróxido de potássio','Ca(OH)2 — hidróxido de cálcio']),
-    _NameCard('Sais','Compostos iónicos constituídos por catiões e aniões.',['NaCl — cloreto de sódio','KCl — cloreto de potássio','CaCO3 — carbonato de cálcio'])
-  ]));
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return Scaffold(
+      appBar:AppBar(title:Text(english?'Chemical nomenclature':'Nomenclatura química')),
+      body:ListView(padding:const EdgeInsets.all(16),children:[
+        _NameCard(
+          english?'Oxides':'Óxidos',
+          english?'Binary compounds of oxygen with another element.':'Compostos binários do oxigénio com outro elemento.',
+          english
+            ?['CO₂ — carbon dioxide','SO₃ — sulfur trioxide','Fe₂O₃ — iron(III) oxide']
+            :['CO2 — dióxido de carbono','SO3 — trióxido de enxofre','Fe2O3 — óxido de ferro (III)'],
+        ),
+        _NameCard(
+          english?'Acids':'Ácidos',
+          english?'In aqueous solution, acids increase the concentration of H₃O⁺ ions.':'Em solução aquosa, aumentam a concentração de H3O+.',
+          english
+            ?['HCl — hydrochloric acid','H₂SO₄ — sulfuric acid','HNO₃ — nitric acid']
+            :['HCl — ácido clorídrico','H2SO4 — ácido sulfúrico','HNO3 — ácido nítrico'],
+        ),
+        _NameCard(
+          english?'Bases':'Bases',
+          english?'Bases include hydroxides that can release OH⁻ ions in water.':'Incluem hidróxidos que podem fornecer OH− em água.',
+          english
+            ?['NaOH — sodium hydroxide','KOH — potassium hydroxide','Ca(OH)₂ — calcium hydroxide']
+            :['NaOH — hidróxido de sódio','KOH — hidróxido de potássio','Ca(OH)2 — hidróxido de cálcio'],
+        ),
+        _NameCard(
+          english?'Salts':'Sais',
+          english?'Ionic compounds made of positive and negative ions.':'Compostos iónicos constituídos por catiões e aniões.',
+          english
+            ?['NaCl — sodium chloride','KCl — potassium chloride','CaCO₃ — calcium carbonate']
+            :['NaCl — cloreto de sódio','KCl — cloreto de potássio','CaCO3 — carbonato de cálcio'],
+        ),
+      ]),
+    );
+  }
 }
 class _NameCard extends StatelessWidget {
   final String title,description;final List<String> examples;
@@ -258,10 +639,22 @@ class _NameCard extends StatelessWidget {
   @override Widget build(BuildContext context)=>Card(child:ExpansionTile(title:Text(title,style:const TextStyle(fontWeight:FontWeight.bold)),subtitle:Text(description),children:examples.map((e)=>ListTile(title:Text(e))).toList()));
 }
 
-class QuizScreen extends StatefulWidget {const QuizScreen({super.key});@override State<QuizScreen> createState()=>_QuizScreenState();}
+class QuizScreen extends StatefulWidget {
+  const QuizScreen({super.key});
+  @override State<QuizScreen> createState()=>_QuizScreenState();
+}
 class _QuizScreenState extends State<QuizScreen>{
-  String grade='Todas';int index=0,score=0;int? selected;bool answered=false,finished=false;
-  List<QuizQuestion> get questions=>quizBank.where((q)=>grade=='Todas'||q.grade==grade).toList();
+  String grade='Todas';
+  int index=0,score=0;
+  int? selected;
+  bool answered=false,finished=false;
+  bool get _english=>isEnglish(context);
+
+  List<QuizQuestion> get questions {
+    final base=quizBank.where((q)=>grade=='Todas'||q.grade==grade).toList();
+    return base.map((q)=>localizedQuizQuestion(q,_english)).toList();
+  }
+
   void next(){
     if(selected==null)return;
     final q=questions[index];
@@ -272,76 +665,288 @@ class _QuizScreenState extends State<QuizScreen>{
     }
     if(index+1>=questions.length){
       setState(() { finished=true; });
-      ProgressStore.saveQuiz('quiz-$grade',score,questions.length);
+      ProgressStore.saveQuiz('quiz-'+grade,score,questions.length);
     } else {
       setState(() { index++; selected=null; answered=false; });
     }
   }
-  @override Widget build(BuildContext context){
+
+  @override
+  Widget build(BuildContext context){
     final qs=questions;
-    return Scaffold(appBar:AppBar(title:const Text('Exercícios e avaliações')),body:finished?Center(child:Padding(padding:const EdgeInsets.all(24),child:Column(mainAxisSize:MainAxisSize.min,children:[const Icon(Icons.emoji_events,color:Colors.amber,size:64),Text('Resultado: $score / ${qs.length}',style:const TextStyle(fontSize:25,fontWeight:FontWeight.bold)),const SizedBox(height:12),FilledButton(onPressed:()=>setState(() { index=0; score=0; selected=null; answered=false; finished=false; }),child:const Text('Repetir avaliação'))]))):ListView(padding:const EdgeInsets.all(18),children:[
-      DropdownButtonFormField<String>(initialValue:grade,decoration:const InputDecoration(labelText:'Classe',border:OutlineInputBorder()),items:['Todas','7.ª classe','8.ª classe','9.ª classe','10.ª classe','11.ª classe','12.ª classe'].map((v)=>DropdownMenuItem(value:v,child:Text(v))).toList(),onChanged:(v)=>setState(() { grade=v!; index=0; score=0; selected=null; answered=false; finished=false; })),
-      const SizedBox(height:18),Text('Questão ${index+1} de ${qs.length}',style:const TextStyle(color:cyan)),
-      Text(qs[index].prompt,style:const TextStyle(fontSize:20,fontWeight:FontWeight.bold)),
-      const SizedBox(height:12),...List.generate(qs[index].options.length,(i)=>Card(child:RadioListTile<int>(value:i,groupValue:selected,title:Text(qs[index].options[i]),onChanged:answered?null:(v)=>setState(()=>selected=v)))),
-      if(answered)Card(child:Padding(padding:const EdgeInsets.all(14),child:Text((selected==qs[index].answer?'Correcto! ':'Não está correcto. A resposta certa é: ${qs[index].options[qs[index].answer]}. ')+qs[index].explanation,style:const TextStyle(height:1.4)))),
-      FilledButton(onPressed:selected==null?null:next,child:Text(!answered?'Verificar resposta':index+1==qs.length?'Ver resultado':'Próxima questão'))
-    ]));
+    final gradeOptions=['Todas','7.ª classe','8.ª classe','9.ª classe','10.ª classe','11.ª classe','12.ª classe'];
+    return Scaffold(
+      appBar:AppBar(title:Text(_english?'Exercises and assessments':'Exercícios e avaliações')),
+      body:finished
+        ?Center(
+          child:Padding(
+            padding:const EdgeInsets.all(24),
+            child:Column(
+              mainAxisSize:MainAxisSize.min,
+              children:[
+                const Icon(Icons.emoji_events,color:Colors.amber,size:64),
+                Text(
+                  (_english?'Result: ':'Resultado: ')+score.toString()+' / '+qs.length.toString(),
+                  style:const TextStyle(fontSize:25,fontWeight:FontWeight.bold),
+                ),
+                const SizedBox(height:12),
+                FilledButton(
+                  onPressed:()=>setState(() {
+                    index=0;score=0;selected=null;answered=false;finished=false;
+                  }),
+                  child:Text(_english?'Try again':'Repetir avaliação'),
+                ),
+              ],
+            ),
+          ),
+        )
+        :ListView(
+          padding:const EdgeInsets.all(18),
+          children:[
+            DropdownButtonFormField<String>(
+              initialValue:grade,
+              decoration:InputDecoration(
+                labelText:_english?'Grade':'Classe',
+                border:const OutlineInputBorder(),
+              ),
+              items:gradeOptions.map((value)=>DropdownMenuItem(
+                value:value,
+                child:Text(value=='Todas'
+                  ?(_english?'All grades':'Todas')
+                  :localizedGrade(value,_english)),
+              )).toList(),
+              onChanged:(value)=>setState(() {
+                grade=value!;
+                index=0;score=0;selected=null;answered=false;finished=false;
+              }),
+            ),
+            const SizedBox(height:18),
+            Text(
+              (_english?'Question ':'Questão ')+(index+1).toString()+
+              (_english?' of ':' de ')+qs.length.toString(),
+              style:const TextStyle(color:cyan),
+            ),
+            Text(qs[index].prompt,style:const TextStyle(fontSize:20,fontWeight:FontWeight.bold)),
+            const SizedBox(height:12),
+            ...List.generate(qs[index].options.length,(i)=>Card(
+              child:RadioListTile<int>(
+                value:i,
+                groupValue:selected,
+                title:Text(qs[index].options[i]),
+                onChanged:answered?null:(value)=>setState(()=>selected=value),
+              ),
+            )),
+            if(answered)
+              Card(
+                child:Padding(
+                  padding:const EdgeInsets.all(14),
+                  child:Text(
+                    (selected==qs[index].answer
+                      ?(_english?'Correct! ':'Correcto! ')
+                      :(_english
+                        ?'Not quite. The correct answer is: '
+                        :'Não está correcto. A resposta certa é: ')+qs[index].options[qs[index].answer]+'. ')+
+                    qs[index].explanation,
+                    style:const TextStyle(height:1.4),
+                  ),
+                ),
+              ),
+            FilledButton(
+              onPressed:selected==null?null:next,
+              child:Text(!answered
+                ?(_english?'Check answer':'Verificar resposta')
+                :index+1==qs.length
+                  ?(_english?'See result':'Ver resultado')
+                  :(_english?'Next question':'Próxima questão')),
+            ),
+          ],
+        ),
+    );
   }
 }
-
-class ProgressScreen extends StatefulWidget {const ProgressScreen({super.key});@override State<ProgressScreen> createState()=>_ProgressScreenState();}
+class ProgressScreen extends StatefulWidget {
+  const ProgressScreen({super.key});
+  @override State<ProgressScreen> createState()=>_ProgressScreenState();
+}
 class _ProgressScreenState extends State<ProgressScreen>{
   late Future<Map<String,dynamic>> data;
   @override void initState(){super.initState();data=ProgressStore.read();}
-  @override Widget build(BuildContext context)=>FutureBuilder<Map<String,dynamic>>(future:data,builder:(context,s){final d=s.data??{};final lessons=List<String>.from(d['lessons']??[]);final scores=Map<String,dynamic>.from(d['bestScores']??{});return ListView(padding:const EdgeInsets.all(18),children:[
-    Row(children:[const Expanded(child:Text('O teu progresso',style:TextStyle(fontSize:27,fontWeight:FontWeight.w900))),IconButton(onPressed:()=>setState(()=>data=ProgressStore.read()),icon:const Icon(Icons.refresh))]),
-    Card(child:ListTile(leading:const Icon(Icons.menu_book,color:cyan),title:const Text('Lições concluídas'),trailing:Text('${lessons.length}'))),
-    Card(child:ListTile(leading:const Icon(Icons.quiz,color:cyan),title:const Text('Avaliações realizadas'),trailing:Text('${scores.length}'))),
-    const Text('Melhores resultados',style:TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
-    ...scores.entries.map((e)=>ListTile(title:Text(e.key),trailing:Text('${e.value} pontos'))),
-    if(lessons.isEmpty&&scores.isEmpty)const Text('Ainda não há progresso guardado. Conclui uma lição ou faz uma avaliação.')
-  ]); });
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return FutureBuilder<Map<String,dynamic>>(
+      future:data,
+      builder:(context,s){
+        final d=s.data??{};
+        final lessons=List<String>.from(d['lessons']??[]);
+        final scores=Map<String,dynamic>.from(d['bestScores']??{});
+        return ListView(padding:const EdgeInsets.all(18),children:[
+          Row(children:[
+            Expanded(child:Text(english?'Your progress':'O teu progresso',style:const TextStyle(fontSize:27,fontWeight:FontWeight.w900))),
+            IconButton(onPressed:()=>setState(()=>data=ProgressStore.read()),icon:const Icon(Icons.refresh)),
+          ]),
+          Card(child:ListTile(
+            leading:const Icon(Icons.menu_book,color:cyan),
+            title:Text(english?'Completed lessons':'Lições concluídas'),
+            trailing:Text(lessons.length.toString()),
+          )),
+          Card(child:ListTile(
+            leading:const Icon(Icons.quiz,color:cyan),
+            title:Text(english?'Assessments completed':'Avaliações realizadas'),
+            trailing:Text(scores.length.toString()),
+          )),
+          Text(english?'Best results':'Melhores resultados',style:const TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
+          ...scores.entries.map((entry)=>ListTile(
+            title:Text(entry.key),
+            trailing:Text(entry.value.toString()+(english?' points':' pontos')),
+          )),
+          if(lessons.isEmpty&&scores.isEmpty)
+            Text(english
+              ?'No progress has been saved yet. Complete a lesson or take a quiz.'
+              :'Ainda não há progresso guardado. Conclui uma lição ou faz uma avaliação.'),
+        ]);
+      },
+    );
+  }
 }
 class SettingsScreen extends StatelessWidget {
-  final bool dark;final VoidCallback onTheme;
-  const SettingsScreen({super.key,required this.dark,required this.onTheme});
-  @override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(18),children:[
-    const Text('Definições',style:TextStyle(fontSize:28,fontWeight:FontWeight.w900)),
-    const Text('Personaliza a tua experiência de aprendizagem.'),
-    const SizedBox(height:16),
-    _SettingsSection(title:'APARÊNCIA',children:[
-      SwitchListTile(value:dark,onChanged:(_)=>onTheme(),secondary:const Icon(Icons.dark_mode_outlined,color:cyan),title:const Text('Modo escuro'),subtitle:Text(dark?'Tema azul neon activo':'Tema claro activo')),
-      const ListTile(leading:Icon(Icons.palette_outlined,color:violet),title:Text('Identidade visual'),subtitle:Text('Azul eléctrico • Ciano • Violeta')),
-    ]),
-    _SettingsSection(title:'PREFERÊNCIAS',children:[
-      const ListTile(leading:Icon(Icons.language,color:cyan),title:Text('Idioma'),subtitle:Text('Português (Moçambique) • Outros idiomas numa próxima versão')),
-      const ListTile(leading:Icon(Icons.offline_pin_outlined,color:cyan),title:Text('Acesso offline'),subtitle:Text('Aulas, tabela periódica e ferramentas disponíveis sem Internet')),
-      const ListTile(leading:Icon(Icons.notifications_none,color:cyan),title:Text('Notificações'),subtitle:Text('Lembretes de estudo — brevemente')),
-    ]),
-    _SettingsSection(title:'DADOS E PRIVACIDADE',children:[
-      const ListTile(leading:Icon(Icons.phone_android,color:cyan),title:Text('Armazenamento local'),subtitle:Text('O progresso é guardado neste dispositivo.')),
-      ListTile(leading:const Icon(Icons.delete_outline,color:Colors.orange),title:const Text('Limpar progresso'),subtitle:const Text('Apagar lições concluídas e resultados guardados.'),onTap:()async{
-        final confirmed=await showDialog<bool>(context:context,builder:(dialogContext)=>AlertDialog(
-          title:const Text('Limpar progresso?'),
-          content:const Text('Esta acção apaga as lições concluídas e os resultados guardados neste dispositivo.'),
-          actions:[
-            TextButton(onPressed:()=>Navigator.pop(dialogContext,false),child:const Text('Cancelar')),
-            FilledButton(onPressed:()=>Navigator.pop(dialogContext,true),child:const Text('Limpar')),
-          ],
-        ));
-        if(confirmed==true){
-          await ProgressStore.clear();
-          if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Progresso apagado.')));
-        }
-      }),
-    ]),
-    _SettingsSection(title:'SOBRE',children:[
-      const ListTile(leading:Icon(Icons.science_outlined,color:cyan),title:Text('ChemMaster'),subtitle:Text('Aprender • Praticar • Conquistar')),
-      const ListTile(leading:Icon(Icons.public,color:cyan),title:Text('Desenvolvido para Moçambique'),subtitle:Text('Com visão de expansão para estudantes de todo o mundo.')),
-      const ListTile(leading:Icon(Icons.info_outline,color:cyan),title:Text('Versão 1.0.0'),subtitle:Text('Primeira versão de aprendizagem química.')),
-    ]),
-  ]);
+  final bool dark;
+  final String language;
+  final VoidCallback onTheme;
+  final ValueChanged<String> onLanguage;
+
+  const SettingsScreen({
+    super.key,
+    required this.dark,
+    required this.language,
+    required this.onTheme,
+    required this.onLanguage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return ListView(padding:const EdgeInsets.all(18),children:[
+      Text(english?'Settings':'Definições',style:const TextStyle(fontSize:28,fontWeight:FontWeight.w900)),
+      Text(english
+          ?'Make ChemMaster work the way you study.'
+          :'Personaliza a tua experiência de aprendizagem.'),
+      const SizedBox(height:16),
+      _SettingsSection(title:english?'APPEARANCE':'APARÊNCIA',children:[
+        SwitchListTile(
+          value:dark,
+          onChanged:(_)=>onTheme(),
+          secondary:const Icon(Icons.dark_mode_outlined,color:cyan),
+          title:Text(english?'Dark mode':'Modo escuro'),
+          subtitle:Text(dark
+              ?(english?'Neon blue theme active':'Tema azul neon activo')
+              :(english?'Light theme active':'Tema claro activo')),
+        ),
+        ListTile(
+          leading:const Icon(Icons.palette_outlined,color:violet),
+          title:Text(english?'Visual identity':'Identidade visual'),
+          subtitle:const Text('Electric blue • Cyan • Violet'),
+        ),
+      ]),
+      _SettingsSection(title:english?'LANGUAGE':'IDIOMA',children:[
+        ListTile(
+          leading:const Icon(Icons.translate,color:cyan),
+          title:Text(english?'App language':'Idioma do aplicativo'),
+          subtitle:Text(english
+              ?'Choose the language for menus and tools.'
+              :'Escolhe o idioma dos menus e das ferramentas.'),
+          trailing:DropdownButtonHideUnderline(
+            child:DropdownButton<String>(
+              value:language,
+              onChanged:(value){if(value!=null)onLanguage(value);},
+              items:const [
+                DropdownMenuItem(value:'pt',child:Text('Português')),
+                DropdownMenuItem(value:'en',child:Text('English')),
+              ],
+            ),
+          ),
+        ),
+      ]),
+      _SettingsSection(title:english?'PREFERENCES':'PREFERÊNCIAS',children:[
+        ListTile(
+          leading:const Icon(Icons.offline_pin_outlined,color:cyan),
+          title:Text(english?'Offline access':'Acesso offline'),
+          subtitle:Text(english
+              ?'The catalog, periodic table and core tools are available without internet.'
+              :'O catálogo, a tabela periódica e as ferramentas essenciais funcionam sem Internet.'),
+        ),
+        ListTile(
+          leading:const Icon(Icons.notifications_none,color:cyan),
+          title:Text(english?'Study reminders':'Lembretes de estudo'),
+          subtitle:Text(english?'Coming in a future update':'Disponíveis numa actualização futura'),
+        ),
+      ]),
+      _SettingsSection(title:english?'DATA & PRIVACY':'DADOS E PRIVACIDADE',children:[
+        ListTile(
+          leading:const Icon(Icons.phone_android,color:cyan),
+          title:Text(english?'Local storage':'Armazenamento local'),
+          subtitle:Text(english
+              ?'Your progress is stored on this device.'
+              :'O teu progresso é guardado neste dispositivo.'),
+        ),
+        ListTile(
+          leading:const Icon(Icons.delete_outline,color:Colors.orange),
+          title:Text(english?'Clear progress':'Limpar progresso'),
+          subtitle:Text(english
+              ?'Delete completed lessons and saved results.'
+              :'Apagar lições concluídas e resultados guardados.'),
+          onTap:()async{
+            final confirmed=await showDialog<bool>(
+              context:context,
+              builder:(dialogContext)=>AlertDialog(
+                title:Text(english?'Clear progress?':'Limpar progresso?'),
+                content:Text(english
+                    ?'This deletes completed lessons and saved results on this device.'
+                    :'Esta acção apaga as lições concluídas e os resultados guardados neste dispositivo.'),
+                actions:[
+                  TextButton(
+                    onPressed:()=>Navigator.pop(dialogContext,false),
+                    child:Text(english?'Cancel':'Cancelar'),
+                  ),
+                  FilledButton(
+                    onPressed:()=>Navigator.pop(dialogContext,true),
+                    child:Text(english?'Clear':'Limpar'),
+                  ),
+                ],
+              ),
+            );
+            if(confirmed==true){
+              await ProgressStore.clear();
+              if(context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content:Text(english?'Progress cleared.':'Progresso apagado.')),
+                );
+              }
+            }
+          },
+        ),
+      ]),
+      _SettingsSection(title:english?'ABOUT':'SOBRE',children:[
+        ListTile(
+          leading:const Icon(Icons.science_outlined,color:cyan),
+          title:const Text('ChemMaster'),
+          subtitle:Text(english?'Learn • Explore • Understand':'Aprender • Explorar • Compreender'),
+        ),
+        ListTile(
+          leading:const Icon(Icons.public,color:cyan),
+          title:Text(english?'Made for Mozambique':'Desenvolvido para Moçambique'),
+          subtitle:Text(english
+              ?'Built to grow with students and teachers everywhere.'
+              :'Com visão de expansão para estudantes e professores de todo o mundo.'),
+        ),
+        ListTile(
+          leading:const Icon(Icons.info_outline,color:cyan),
+          title:Text(english?'Version 1.0.0':'Versão 1.0.0'),
+          subtitle:Text(english?'Chemistry learning platform':'Plataforma de aprendizagem de Química'),
+        ),
+      ]),
+    ]);
+  }
 }
 class _SettingsSection extends StatelessWidget {
   final String title;final List<Widget> children;

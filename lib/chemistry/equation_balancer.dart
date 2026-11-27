@@ -15,11 +15,11 @@ class _Q {
 }
 class EquationBalancer {
   static String balance(String input) {
-    final normalized=input.replaceAll('→','->').replaceAll('=','->');
+    final normalized=input.replaceAll('→','->').replaceAll('⇒','->').replaceAll('⇌','->').replaceAll('=>','->').replaceAll('=','->').replaceAll('＋','+');
     final sides=normalized.split('->');
     if(sides.length!=2) throw FormatException('Separa reagentes e produtos com ->.');
-    final left=sides[0].split('+').map((x)=>x.trim()).toList();
-    final right=sides[1].split('+').map((x)=>x.trim()).toList();
+    final left=sides[0].split('+').map((x)=>FormulaParser.normalize(x.trim())).toList();
+    final right=sides[1].split('+').map((x)=>FormulaParser.normalize(x.trim())).toList();
     final formulas=[...left,...right];
     if(left.isEmpty||right.isEmpty||formulas.any((x)=>x.isEmpty)||formulas.length>10) throw FormatException('Número de substâncias inválido.');
     final parsed=formulas.map(FormulaParser.parse).toList();
