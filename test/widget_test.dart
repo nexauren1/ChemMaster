@@ -7,6 +7,6 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(const ChemMasterApp());
     expect(find.text('ChemMaster'), findsOneWidget);
-    expect(find.text('Aprender • Praticar • Conquistar'), findsOneWidget);
+    expect(find.text('Química, com mais clareza.'), findsOneWidget);
   });
 }
