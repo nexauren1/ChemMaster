@@ -377,8 +377,8 @@ class _CalculatorsScreenState extends State<CalculatorsScreen>{
   Future<void> _selectFormula() async {
     final item = await ChemicalPicker.show(
       context,
-      mode: ChemicalPickerMode.compoundsOnly,
-      title: _english ? 'Choose a compound' : 'Escolher composto',
+      mode: ChemicalPickerMode.all,
+      title: _english ? 'Choose an element or compound' : 'Escolher elemento ou composto',
     );
     if (!mounted || item == null) return;
     setState(() => formula.text = item.formula);
