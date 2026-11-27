@@ -6,6 +6,7 @@ import '../data/reaction_localization.dart';
 import '../widgets/chemical_picker.dart';
 
 import '../chemistry/electron_configuration.dart';
+import '../chemistry/equation_analysis.dart';
 import '../chemistry/reaction_predictor.dart';
 import '../data/periodic_elements.dart';
 
@@ -301,6 +302,12 @@ class _PredictionResult extends StatelessWidget {
   Widget build(BuildContext context) {
     final english = isEnglish(context);
     final text = localizedReactionText(prediction, english);
+    final atomCounts = prediction.isGeneralReaction
+        ? <String, AtomBalance>{}
+        : EquationAnalysis.analyze(prediction.equation);
+    final displayedEquation = prediction.isGeneralReaction && english
+        ? 'Triglyceride + 3NaOH → 3RCOONa + C₃H₈O₃'
+        : prettyEquation(prediction.equation);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(17),
@@ -333,12 +340,51 @@ class _PredictionResult extends StatelessWidget {
                 border: Border.all(color: _chemCyan.withValues(alpha: .45)),
               ),
               child: SelectableText(
-                prettyEquation(prediction.equation),
+                displayedEquation,
                 style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900, height: 1.5),
               ),
             ),
             const SizedBox(height: 12),
             Text(text.summary, style: const TextStyle(height: 1.45)),
+            if (atomCounts.isNotEmpty) ...[
+              const Divider(height: 26),
+              Text(
+                english ? 'Atom conservation check' : 'Verificação da conservação dos átomos',
+                style: const TextStyle(fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 8),
+              ...atomCounts.entries.map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 34,
+                        child: Text(entry.key, style: const TextStyle(fontWeight: FontWeight.w900)),
+                      ),
+                      Expanded(
+                        child: Text((english ? 'Reactants: ' : 'Reagentes: ') + entry.value.reactants.toString()),
+                      ),
+                      Expanded(
+                        child: Text((english ? 'Products: ' : 'Produtos: ') + entry.value.products.toString()),
+                      ),
+                      Icon(
+                        entry.value.isBalanced ? Icons.check_circle : Icons.error,
+                        color: entry.value.isBalanced ? Colors.green : Colors.red,
+                        size: 18,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                english
+                    ? 'The number of atoms of each element is the same on both sides.'
+                    : 'O número de átomos de cada elemento é igual nos dois lados.',
+                style: const TextStyle(fontSize: 12, height: 1.4),
+              ),
+            ],
             const SizedBox(height: 14),
             Text(
               english ? 'Step-by-step explanation' : 'Explicação passo a passo',
