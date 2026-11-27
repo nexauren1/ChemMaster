@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../core/chem_language.dart';
+import '../data/chemical_catalog.dart';
+import '../widgets/chemical_picker.dart';
+
 import '../chemistry/electron_configuration.dart';
 import '../chemistry/reaction_predictor.dart';
 import '../data/periodic_elements.dart';
@@ -16,21 +20,77 @@ class ProductDiscoveryScreen extends StatefulWidget {
 }
 
 class _ProductDiscoveryScreenState extends State<ProductDiscoveryScreen> {
-  final TextEditingController _input =
-      TextEditingController(text: 'CO2 + H2O');
+  final List<ChemicalSpecies> _reactants = [];
   ReactionPrediction? _prediction;
   String? _message;
   bool _searched = false;
 
-  void _discover([String? example]) {
-    if (example != null) _input.text = example;
-    FocusScope.of(context).unfocus();
+  bool get _english => isEnglish(context);
+
+  Future<void> _addReactant() async {
+    if (_reactants.length >= 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_english
+            ? 'Choose up to four reactants for this tool.'
+            : 'Escolhe até quatro reagentes nesta ferramenta.')),
+      );
+      return;
+    }
+    final item = await ChemicalPicker.show(context);
+    if (!mounted || item == null) return;
+    setState(() {
+      if (!_reactants.any((existing) => existing.id == item.id)) {
+        _reactants.add(item);
+      }
+      _prediction = null;
+      _message = null;
+      _searched = false;
+    });
+  }
+
+  void _loadExample(List<String> formulas) {
+    final items = formulas.map((formula) => chemicalCatalog.firstWhere(
+      (item) => item.formula == formula,
+    )).toList();
+    setState(() {
+      _reactants
+        ..clear()
+        ..addAll(items);
+      _prediction = null;
+      _message = null;
+      _searched = false;
+    });
+  }
+
+  void _removeReactant(ChemicalSpecies item) {
+    setState(() {
+      _reactants.remove(item);
+      _prediction = null;
+      _message = null;
+      _searched = false;
+    });
+  }
+
+  void _discover() {
+    if (_reactants.length < 2) {
+      setState(() {
+        _prediction = null;
+        _message = _english
+            ? 'Choose at least two reactants. A reaction needs substances to interact.'
+            : 'Escolhe pelo menos dois reagentes. Uma reacção precisa de substâncias que interajam.';
+        _searched = true;
+      });
+      return;
+    }
     try {
-      final result = ReactionPredictor.predict(_input.text);
+      final formulas = _reactants.map(formulaForReaction).toList();
+      final result = ReactionPredictor.predict(formulas.join(' + '));
       setState(() {
         _prediction = result;
         _message = result == null
-            ? 'Ainda não tenho uma regra química suficientemente segura para estes reagentes. O produto pode depender da concentração, temperatura, pressão, solvente ou de um catalisador.'
+            ? (_english
+                ? 'This combination is not yet in the verified reaction library. Products may depend on temperature, concentration, pressure, solvent or a catalyst. The app will not guess.'
+                : 'Esta combinação ainda não está na biblioteca de reacções verificadas. Os produtos podem depender da temperatura, concentração, pressão, solvente ou catalisador. O app não vai adivinhar.')
             : null;
         _searched = true;
       });
@@ -43,104 +103,193 @@ class _ProductDiscoveryScreenState extends State<ProductDiscoveryScreen> {
     } catch (_) {
       setState(() {
         _prediction = null;
-        _message = 'Não consegui interpretar esta entrada. Verifica as fórmulas e separa os reagentes com +.';
+        _message = _english
+            ? 'I could not interpret this selection. Choose the substances again.'
+            : 'Não consegui interpretar esta selecção. Escolhe novamente as substâncias.';
         _searched = true;
       });
     }
   }
 
-  @override
-  void dispose() {
-    _input.dispose();
-    super.dispose();
+  void _showSoap() {
+    setState(() {
+      _prediction = ReactionPredictor.soap();
+      _message = null;
+      _searched = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Descobrir produtos')),
-        body: ListView(
-          padding: const EdgeInsets.all(18),
-          children: [
-            const Text(
-              'Escreve apenas os reagentes. O ChemMaster procura uma reacção conhecida, prevê os produtos e ajusta a equação.',
-              style: TextStyle(fontSize: 15, height: 1.45),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: _input,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) => _discover(),
-              decoration: const InputDecoration(
-                labelText: 'Reagentes',
-                hintText: 'Ex.: CO2 + H2O',
-                helperText: 'Não precisas de escrever a seta nem os produtos.',
-                prefixIcon: Icon(Icons.science_outlined),
-              ),
-            ),
-            const SizedBox(height: 10),
-            FilledButton.icon(
-              onPressed: _discover,
-              icon: const Icon(Icons.auto_awesome),
-              label: const Text('Descobrir produtos'),
-            ),
-            const SizedBox(height: 12),
-            const Text('Experimenta um exemplo', style: TextStyle(fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+    appBar: AppBar(
+      title: Text(_english ? 'Discover products' : 'Descobrir produtos'),
+    ),
+    body: ListView(
+      padding: const EdgeInsets.all(18),
+      children: [
+        Text(
+          _english
+              ? 'Tap + and select the reactants. ChemMaster searches its offline reaction library, predicts known products and balances the equation.'
+              : 'Toca em + e escolhe os reagentes. O ChemMaster consulta a biblioteca offline de reacções, apresenta produtos conhecidos e equilibra a equação.',
+          style: const TextStyle(fontSize: 15, height: 1.45),
+        ),
+        const SizedBox(height: 15),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ActionChip(label: const Text('CO2 + H2O'), onPressed: () => _discover('CO2 + H2O')),
-                ActionChip(label: const Text('HCl + KOH'), onPressed: () => _discover('HCl + KOH')),
-                ActionChip(label: const Text('CaO + H2O'), onPressed: () => _discover('CaO + H2O')),
-                ActionChip(label: const Text('CH4 + O2'), onPressed: () => _discover('CH4 + O2')),
-                ActionChip(label: const Text('Sabão'), onPressed: () => _discover('Sabão')),
+                Row(
+                  children: [
+                    const Icon(Icons.science_outlined, color: _chemCyan),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _english ? 'Selected reactants' : 'Reagentes escolhidos',
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                    Text(
+                      _reactants.length.toString() + '/4',
+                      style: const TextStyle(color: _chemCyan, fontWeight: FontWeight.w900),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                if (_reactants.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 17),
+                    child: Center(
+                      child: Text(
+                        _english ? 'No reactants selected yet' : 'Ainda não escolheste reagentes',
+                      ),
+                    ),
+                  )
+                else
+                  ..._reactants.map(
+                    (item) => Container(
+                      margin: const EdgeInsets.only(bottom: 7),
+                      decoration: BoxDecoration(
+                        color: _chemBlue.withValues(alpha: .10),
+                        borderRadius: BorderRadius.circular(13),
+                      ),
+                      child: ListTile(
+                        dense: true,
+                        leading: Text(
+                          prettyFormula(formulaForReaction(item)),
+                          style: const TextStyle(color: _chemCyan, fontWeight: FontWeight.w900, fontSize: 17),
+                        ),
+                        title: Text(item.name(_english), style: const TextStyle(fontWeight: FontWeight.w800)),
+                        subtitle: Text(item.isElement
+                            ? (_english ? 'Element • usual reaction form' : 'Elemento • forma habitual na reacção')
+                            : categoryName(item.group, _english)),
+                        trailing: IconButton(
+                          onPressed: () => _removeReactant(item),
+                          icon: const Icon(Icons.close),
+                          tooltip: _english ? 'Remove' : 'Remover',
+                        ),
+                      ),
+                    ),
+                  ),
+                OutlinedButton.icon(
+                  onPressed: _addReactant,
+                  icon: const Icon(Icons.add_circle_outline),
+                  label: Text(_english ? 'Add reactant from catalog' : 'Adicionar reagente do catálogo'),
+                  style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+                ),
               ],
             ),
-            if (_searched && _prediction != null) ...[
-              const SizedBox(height: 18),
-              _PredictionResult(prediction: _prediction!),
-            ],
-            if (_searched && _message != null) ...[
-              const SizedBox(height: 18),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(17),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.info_outline, color: Colors.orange),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Ainda não é possível determinar o produto',
-                              style: TextStyle(fontWeight: FontWeight.w900),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Text(_message!, style: const TextStyle(height: 1.45)),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Uma lista de elementos, por si só, não define uma reacção única. É preciso conhecer os reagentes reais e, em alguns casos, as condições da reacção.',
-                        style: TextStyle(fontSize: 12, color: Colors.amber, height: 1.4),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 18),
-            const _InfoPanel(
-              title: 'O que esta ferramenta faz',
-              body: 'Reconhece padrões de reacções químicas guardados no próprio app. Funciona offline. A base de reacções será ampliada com exemplos e explicações revistos.',
+          ),
+        ),
+        const SizedBox(height: 13),
+        Text(
+          _english ? 'Try a guided example' : 'Experimenta um exemplo',
+          style: const TextStyle(fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ActionChip(
+              label: const Text('CO₂ + H₂O'),
+              onPressed: () => _loadExample(['CO2', 'H2O']),
+            ),
+            ActionChip(
+              label: const Text('HCl + KOH'),
+              onPressed: () => _loadExample(['HCl', 'KOH']),
+            ),
+            ActionChip(
+              label: const Text('CaO + H₂O'),
+              onPressed: () => _loadExample(['CaO', 'H2O']),
+            ),
+            ActionChip(
+              label: const Text('CH₄ + O₂'),
+              onPressed: () => _loadExample(['CH4', 'O2']),
+            ),
+            ActionChip(
+              label: Text(_english ? 'Soap' : 'Sabão'),
+              onPressed: _showSoap,
             ),
           ],
         ),
-      );
+        const SizedBox(height: 14),
+        FilledButton.icon(
+          onPressed: _discover,
+          icon: const Icon(Icons.auto_awesome),
+          label: Text(_english ? 'Discover products' : 'Descobrir produtos'),
+        ),
+        if (_searched && _prediction != null) ...[
+          const SizedBox(height: 18),
+          _PredictionResult(prediction: _prediction!),
+        ],
+        if (_searched && _message != null) ...[
+          const SizedBox(height: 18),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(17),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: Colors.orange),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _english
+                              ? 'The result needs more chemistry data'
+                              : 'Ainda não é possível determinar o produto',
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(_message!, style: const TextStyle(height: 1.45)),
+                  const SizedBox(height: 10),
+                  Text(
+                    _english
+                        ? 'Elements are not magic ingredients: not every pair reacts, and one pair can form different products under different conditions.'
+                        : 'Os elementos não são ingredientes mágicos: nem todos os pares reagem, e o mesmo par pode formar produtos diferentes em condições diferentes.',
+                    style: const TextStyle(fontSize: 12, color: Colors.amber, height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 18),
+        _InfoPanel(
+          title: _english ? 'How this tool works' : 'Como esta ferramenta funciona',
+          body: _english
+              ? 'The offline library contains curated school-level reactions. It is designed to give reliable explanations, not to invent products for every possible mixture. New reactions can be added as reviewed learning modules.'
+              : 'A biblioteca offline contém reacções escolares seleccionadas e revistas. Foi criada para dar explicações fiáveis, não para inventar produtos para qualquer mistura. Novas reacções podem ser acrescentadas como módulos de aprendizagem revistos.',
+        ),
+      ],
+    ),
+  );
 }
 
 class _PredictionResult extends StatelessWidget {
