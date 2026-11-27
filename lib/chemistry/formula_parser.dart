@@ -70,7 +70,7 @@ class FormulaParser {
       final candidates = <String>[];
       if (RegExp(r'[A-Z]').hasMatch(first)) {
         if (index + 1 < source.length &&
-            RegExp(r'[A-Za-z]').hasMatch(source[index + 1])) {
+            RegExp(r'[a-z]').hasMatch(source[index + 1])) {
           final pair =
               first.toUpperCase() + source[index + 1].toLowerCase();
           if (_symbols.contains(pair)) candidates.add(pair);
