@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'chemistry/equation_balancer.dart';
+import 'screens/advanced_chemistry_screens.dart';
 import 'chemistry/formula_parser.dart';
 import 'data/curriculum.dart';
 import 'data/periodic_elements.dart';
@@ -73,7 +74,10 @@ class HomeScreen extends StatelessWidget {
       _HomeCard(icon:Icons.menu_book,title:'Academia',detail:'Classes e lições',onTap:()=>onTab(1)),
       _HomeCard(icon:Icons.functions,title:'Equações',detail:'Balanceamento',onTap:()=>Navigator.push(context,neonRoute(const BalanceScreen()))),
       _HomeCard(icon:Icons.calculate,title:'Calculadoras',detail:'Massa, mol e soluções',onTap:()=>Navigator.push(context,neonRoute(const CalculatorsScreen()))),
-      _HomeCard(icon:Icons.grid_on,title:'Tabela periódica',detail:'118 elementos',onTap:()=>Navigator.push(context,neonRoute(const PeriodicScreen()))) ]),
+      _HomeCard(icon:Icons.grid_on,title:'Tabela periódica',detail:'118 elementos',onTap:()=>Navigator.push(context,neonRoute(const PeriodicScreen()))),
+      _HomeCard(icon:Icons.auto_awesome,title:'Descobrir produtos',detail:'Prever reacções',onTap:()=>Navigator.push(context,neonRoute(const ProductDiscoveryScreen()))),
+      _HomeCard(icon:Icons.hub,title:'Estrutura atómica',detail:'Calcular Z, A e N',onTap:()=>Navigator.push(context,neonRoute(const AtomicStructureScreen()))),
+      _HomeCard(icon:Icons.electric_bolt,title:'Distribuição electrónica',detail:'Configuração electrónica',onTap:()=>Navigator.push(context,neonRoute(const ElectronDistributionScreen()))) ]),
     const SizedBox(height:12),Card(child:ListTile(leading:const Icon(Icons.quiz,color:cyan),title:const Text('Avaliar conhecimentos'),subtitle:const Text('Exercícios por classe'),trailing:const Icon(Icons.chevron_right),onTap:()=>Navigator.push(context,neonRoute(const QuizScreen()))))
   ]);
 }
@@ -140,6 +144,9 @@ class ToolsScreen extends StatelessWidget {
     _ToolTile('Balancear equações','Equações com grupos e parênteses',Icons.functions,const BalanceScreen()),
     _ToolTile('Calculadoras químicas','Massa molar, mol, concentração, densidade e diluição',Icons.calculate,const CalculatorsScreen()),
     _ToolTile('Tabela periódica','Pesquisa dos 118 elementos',Icons.grid_on,const PeriodicScreen()),
+    _ToolTile('Descobrir produtos','Escreve os reagentes e vê produtos conhecidos e equação ajustada',Icons.auto_awesome,const ProductDiscoveryScreen()),
+    _ToolTile('Estrutura atómica','Calcula Z, A, N, protões e electrões',Icons.hub,const AtomicStructureScreen()),
+    _ToolTile('Distribuição electrónica','Configuração electrónica e electrões por camadas',Icons.electric_bolt,const ElectronDistributionScreen()),
     _ToolTile('Tipos de reacções','Síntese, decomposição, deslocamento, dupla troca e neutralização',Icons.sync_alt,const ReactionScreen()),
     _ToolTile('Nomenclatura','Óxidos, ácidos, bases e sais',Icons.spellcheck,const NomenclatureScreen()),
     _ToolTile('Testes e exercícios','Questionário de conhecimentos',Icons.quiz,const QuizScreen()),
