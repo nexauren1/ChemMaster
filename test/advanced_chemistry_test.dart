@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chemmaster/chemistry/electron_configuration.dart';
 import 'package:chemmaster/chemistry/equation_balancer.dart';
+import 'package:chemmaster/chemistry/equation_analysis.dart';
 import 'package:chemmaster/chemistry/formula_parser.dart';
 import 'package:chemmaster/chemistry/reaction_predictor.dart';
 import 'package:chemmaster/data/chemical_catalog.dart';
@@ -66,6 +67,26 @@ void main() {
         EquationBalancer.balance('H2 + O2 ⇒ H2O'),
         '2H2 + O2 → 2H2O',
       );
+    });
+  });
+
+
+  group('EquationAnalysis', () {
+    test('checks every element on both sides of a balanced equation', () {
+      final result = EquationAnalysis.analyze(
+        'CH4 + 2O2 → CO2 + 2H2O',
+      );
+      expect(result['C']!.reactants, 1);
+      expect(result['C']!.products, 1);
+      expect(result['H']!.reactants, 4);
+      expect(result['H']!.products, 4);
+      expect(result['O']!.reactants, 4);
+      expect(result['O']!.products, 4);
+      expect(EquationAnalysis.isBalanced('CH4 + 2O2 → CO2 + 2H2O'), isTrue);
+    });
+
+    test('detects an equation with missing oxygen atoms', () {
+      expect(EquationAnalysis.isBalanced('CH4 + O2 → CO2 + H2O'), isFalse);
     });
   });
 
