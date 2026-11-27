@@ -90,7 +90,7 @@ class FormulaParser {
         // symbols (si, na, mg, ca, fe, ...) while keeping CO2, NO2 and PO4
         // readable as one-letter element combinations.
         final preferSingle = pair != null &&
-            {'Co', 'No', 'Po'}.contains(pair) &&
+            {'Co', 'No', 'Po', 'Nh'}.contains(pair) &&
             (index + 2 >= source.length ||
                 RegExp(r'[0-9]').hasMatch(source[index + 2]));
         if (pair != null && !preferSingle) candidates.add(pair);
