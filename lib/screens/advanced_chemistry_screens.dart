@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/chem_language.dart';
 import '../data/chemical_catalog.dart';
+import '../data/reaction_localization.dart';
 import '../widgets/chemical_picker.dart';
 
 import '../chemistry/electron_configuration.dart';
@@ -297,95 +298,104 @@ class _PredictionResult extends StatelessWidget {
   const _PredictionResult({required this.prediction});
 
   @override
-  Widget build(BuildContext context) => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(17),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.check_circle, color: _chemCyan),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      prediction.title,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
-                    ),
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    final text = localizedReactionText(prediction, english);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(17),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.check_circle, color: _chemCyan),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    text.title,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
                   ),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Text(prediction.reactionType, style: const TextStyle(color: _chemCyan)),
-              const SizedBox(height: 15),
-              const Text('Equação', style: TextStyle(fontWeight: FontWeight.w800)),
-              const SizedBox(height: 7),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(13),
-                decoration: BoxDecoration(
-                  color: _chemBlue.withValues(alpha: .12),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: _chemCyan.withValues(alpha: .45)),
-                ),
-                child: SelectableText(
-                  prediction.equation,
-                  style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900, height: 1.5),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(prediction.productSummary, style: const TextStyle(height: 1.45)),
-              const SizedBox(height: 14),
-              const Text('Explicação passo a passo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 8),
-              ...prediction.explanations.asMap().entries.map(
-                (entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 9),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 25,
-                        height: 25,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: _chemViolet.withValues(alpha: .22),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          (entry.key + 1).toString(),
-                          style: const TextStyle(fontWeight: FontWeight.w900),
-                        ),
-                      ),
-                      const SizedBox(width: 9),
-                      Expanded(child: Text(entry.value, style: const TextStyle(height: 1.4))),
-                    ],
-                  ),
-                ),
-              ),
-              if (prediction.note != null) ...[
-                const Divider(height: 22),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.lightbulb_outline, color: Colors.orange, size: 19),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(prediction.note!, style: const TextStyle(fontSize: 12, height: 1.45))),
-                  ],
                 ),
               ],
-              if (prediction.isGeneralReaction)
-                const Padding(
-                  padding: EdgeInsets.only(top: 10),
-                  child: Text(
-                    'Equação geral: R representa uma cadeia orgânica variável.',
-                    style: TextStyle(fontSize: 12, color: Colors.amber),
-                  ),
+            ),
+            const SizedBox(height: 5),
+            Text(text.type, style: const TextStyle(color: _chemCyan)),
+            const SizedBox(height: 15),
+            Text(english ? 'Equation' : 'Equação', style: const TextStyle(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 7),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                color: _chemBlue.withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _chemCyan.withValues(alpha: .45)),
+              ),
+              child: SelectableText(
+                prettyEquation(prediction.equation),
+                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900, height: 1.5),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(text.summary, style: const TextStyle(height: 1.45)),
+            const SizedBox(height: 14),
+            Text(
+              english ? 'Step-by-step explanation' : 'Explicação passo a passo',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 8),
+            ...text.explanations.asMap().entries.map(
+              (entry) => Padding(
+                padding: const EdgeInsets.only(bottom: 9),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 25,
+                      height: 25,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: _chemViolet.withValues(alpha: .22),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        (entry.key + 1).toString(),
+                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(child: Text(entry.value, style: const TextStyle(height: 1.4))),
+                  ],
                 ),
+              ),
+            ),
+            if (text.note != null) ...[
+              const Divider(height: 22),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.lightbulb_outline, color: Colors.orange, size: 19),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(text.note!, style: const TextStyle(fontSize: 12, height: 1.45))),
+                ],
+              ),
             ],
-          ),
+            if (prediction.isGeneralReaction)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(
+                  english
+                    ? 'General equation: R represents a variable organic chain.'
+                    : 'Equação geral: R representa uma cadeia orgânica variável.',
+                  style: const TextStyle(fontSize: 12, color: Colors.amber),
+                ),
+              ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
 
 class AtomicStructureScreen extends StatefulWidget {
