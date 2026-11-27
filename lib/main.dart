@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/chem_language.dart';
 import 'widgets/chemical_picker.dart';
 import 'screens/reaction_workbench.dart';
+import 'screens/glossary_screen.dart';
 import 'screens/advanced_chemistry_screens.dart';
 import 'chemistry/formula_parser.dart';
 import 'data/curriculum.dart';
@@ -333,6 +334,7 @@ class ToolsScreen extends StatelessWidget {
         children:[
           _ToolTile(english?'Nomenclature':'Nomenclatura',english?'Oxides, acids, bases and salts':'Óxidos, ácidos, bases e sais',Icons.spellcheck,const NomenclatureScreen()),
           _ToolTile(english?'Exercises and tests':'Exercícios e testes',english?'Check knowledge and see explanations':'Avaliar conhecimentos e ver explicações',Icons.quiz,const QuizScreen()),
+          _ToolTile(english?'Chemistry glossary':'Glossário de Química',english?'Search important terms and examples':'Pesquisar termos e exemplos importantes',Icons.menu_book,const GlossaryScreen()),
         ],
       ),
     ]);
