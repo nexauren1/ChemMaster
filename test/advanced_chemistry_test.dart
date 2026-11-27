@@ -8,6 +8,7 @@ void main() {
   group('FormulaParser', () {
     test('accepts lowercase formulas without spaces', () {
       expect(FormulaParser.parse('co2'), {'C': 1, 'O': 2});
+      expect(FormulaParser.parse('CO2'), {'C': 1, 'O': 2});
       expect(FormulaParser.parse('naoh'), {'Na': 1, 'O': 1, 'H': 1});
       expect(FormulaParser.parse('ca(oh)2'), {'Ca': 1, 'O': 2, 'H': 2});
     });
