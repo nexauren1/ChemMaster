@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'core/chem_language.dart';
+import 'data/chemical_catalog.dart';
+import 'widgets/chemical_picker.dart';
+import 'screens/reaction_workbench.dart';
 import 'chemistry/equation_balancer.dart';
 import 'screens/advanced_chemistry_screens.dart';
 import 'chemistry/formula_parser.dart';
@@ -26,7 +31,29 @@ class ChemMasterApp extends StatefulWidget {
 }
 class _ChemMasterAppState extends State<ChemMasterApp> {
   bool dark=true;
+  String language='pt';
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      final saved = prefs.getString('chemmaster.language') ?? 'pt';
+      if (mounted && (saved == 'pt' || saved == 'en')) {
+        setState(() => language = saved);
+      }
+    });
+  }
+
+  Future<void> changeLanguage(String value) async {
+    if (value != 'pt' && value != 'en') return;
+    setState(() => language = value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('chemmaster.language', value);
+  }
+
   @override Widget build(BuildContext context)=>MaterialApp(
+    locale:Locale(language),
+    supportedLocales:const [Locale('pt'),Locale('en')],
     debugShowCheckedModeBanner:false,title:'ChemMaster',
     theme:ThemeData(
       useMaterial3:true,
@@ -40,7 +67,7 @@ class _ChemMasterAppState extends State<ChemMasterApp> {
       navigationBarTheme:NavigationBarThemeData(backgroundColor:dark?const Color(0xFF071A3A):Colors.white,indicatorColor:cyan.withValues(alpha:.18),labelTextStyle:WidgetStateProperty.all(const TextStyle(fontSize:10,fontWeight:FontWeight.w700))),
       dividerColor:dark?cyan.withValues(alpha:.12):blue.withValues(alpha:.10),
     ),
-    home:AppShell(dark:dark,onTheme:()=>setState(()=>dark=!dark)));
+    home:AppShell(dark:dark,language:language,onTheme:()=>setState(()=>dark=!dark),onLanguage:changeLanguage));
 }
 class AppShell extends StatefulWidget {
   final bool dark; final VoidCallback onTheme;
