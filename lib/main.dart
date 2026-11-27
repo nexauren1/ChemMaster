@@ -10,6 +10,8 @@ import 'chemistry/formula_parser.dart';
 import 'data/curriculum.dart';
 import 'data/periodic_elements.dart';
 import 'data/quiz_bank.dart';
+import 'data/curriculum_localization.dart';
+import 'data/quiz_bank_localization.dart';
 import 'services/progress_store.dart';
 
 void main() => runApp(const ChemMasterApp());
@@ -200,40 +202,96 @@ class _HomeCard extends StatelessWidget {
   );
 }
 
-class AcademyScreen extends StatefulWidget {const AcademyScreen({super.key});@override State<AcademyScreen> createState()=>_AcademyScreenState();}
+class AcademyScreen extends StatefulWidget {
+  const AcademyScreen({super.key});
+  @override State<AcademyScreen> createState()=>_AcademyScreenState();
+}
 class _AcademyScreenState extends State<AcademyScreen> {
   String grade='7.ª classe';
-  @override Widget build(BuildContext context){
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
     final selected=mozambiqueCurriculum.firstWhere((c)=>c.grade==grade);
     return ListView(padding:const EdgeInsets.all(18),children:[
-      const Text('Academia',style:TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
-      const Text('Programa de Química • 7.ª à 12.ª classe • Moçambique'),
+      Text(english?'Academy':'Academia',style:const TextStyle(fontSize:27,fontWeight:FontWeight.w900)),
+      Text(english
+        ?'Mozambique secondary Chemistry curriculum • grades 7–12'
+        :'Programa de Química • 7.ª à 12.ª classe • Moçambique'),
       const SizedBox(height:12),
-      Wrap(spacing:7,children:mozambiqueCurriculum.map((c)=>ChoiceChip(label:Text(c.grade),selected:grade==c.grade,onSelected:(_)=>setState(()=>grade=c.grade))).toList()),
+      Wrap(
+        spacing:7,
+        children:mozambiqueCurriculum.map((c)=>ChoiceChip(
+          label:Text(localizedGrade(c.grade,english)),
+          selected:grade==c.grade,
+          onSelected:(_)=>setState(()=>grade=c.grade),
+        )).toList(),
+      ),
       const SizedBox(height:12),
-      ...selected.units.map((u)=>Card(child:ExpansionTile(
-        leading:const Icon(Icons.menu_book,color:cyan),title:Text(u.title,style:const TextStyle(fontWeight:FontWeight.bold)),
-        subtitle:Text('${u.lessons.length} lições'),
-        children:u.lessons.map((l)=>ListTile(
-          title:Text(l.title),subtitle:Text(l.summary,maxLines:2,overflow:TextOverflow.ellipsis),
-          trailing:const Icon(Icons.arrow_forward_ios,size:15),
-          onTap:()=>Navigator.push(context,neonRoute(LessonScreen(lesson:l,grade:grade))))).toList()))),
-      const SizedBox(height:8),const Text('Conteúdos introdutórios organizados para as seis classes. A cobertura detalhada será ampliada e revista continuamente.',style:TextStyle(fontSize:12,color:Colors.amber))
+      ...selected.units.map((unit)=>Card(
+        child:ExpansionTile(
+          leading:const Icon(Icons.menu_book,color:cyan),
+          title:Text(localizedUnitTitle(unit.title,english),style:const TextStyle(fontWeight:FontWeight.bold)),
+          subtitle:Text(unit.lessons.length.toString()+(english?' lessons':' lições')),
+          children:unit.lessons.map((lesson)=>ListTile(
+            title:Text(localizedLessonTitle(lesson,english)),
+            subtitle:Text(localizedLessonSummary(lesson,english),maxLines:2,overflow:TextOverflow.ellipsis),
+            trailing:const Icon(Icons.arrow_forward_ios,size:15),
+            onTap:()=>Navigator.push(context,neonRoute(LessonScreen(lesson:lesson,grade:grade))),
+          )).toList(),
+        ),
+      )),
+      const SizedBox(height:8),
+      Text(
+        english
+          ?'Introductory lessons are organised across all six grades. Detailed coverage is expanded and reviewed continuously.'
+          :'Conteúdos introdutórios organizados para as seis classes. A cobertura detalhada será ampliada e revista continuamente.',
+        style:const TextStyle(fontSize:12,color:Colors.amber),
+      ),
     ]);
   }
 }
 class LessonScreen extends StatelessWidget {
-  final Lesson lesson;final String grade;
+  final Lesson lesson;
+  final String grade;
   const LessonScreen({super.key,required this.lesson,required this.grade});
-  @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:Text(lesson.title)),body:ListView(padding:const EdgeInsets.all(18),children:[
-    Text(grade,style:const TextStyle(color:cyan,fontWeight:FontWeight.bold)),
-    Text(lesson.summary,style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
-    const SizedBox(height:14),Card(child:Padding(padding:const EdgeInsets.all(16),child:Text(lesson.body,style:const TextStyle(fontSize:16,height:1.5)))),
-    ExpansionTile(title:const Text('Exemplo explicado'),leading:const Icon(Icons.lightbulb_outline,color:Colors.orange),children:[Padding(padding:const EdgeInsets.all(16),child:Text(lesson.example))]),
-    const SizedBox(height:16),FilledButton.icon(onPressed:()async{await ProgressStore.completeLesson(lesson.id);if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Lição marcada como concluída.')));},icon:const Icon(Icons.check),label:const Text('Marcar como concluída'))
-  ]));
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return Scaffold(
+      appBar:AppBar(title:Text(localizedLessonTitle(lesson,english))),
+      body:ListView(padding:const EdgeInsets.all(18),children:[
+        Text(localizedGrade(grade,english),style:const TextStyle(color:cyan,fontWeight:FontWeight.bold)),
+        Text(localizedLessonSummary(lesson,english),style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+        const SizedBox(height:14),
+        Card(child:Padding(
+          padding:const EdgeInsets.all(16),
+          child:Text(localizedLessonBody(lesson,english),style:const TextStyle(fontSize:16,height:1.5)),
+        )),
+        ExpansionTile(
+          title:Text(english?'Worked example':'Exemplo explicado'),
+          leading:const Icon(Icons.lightbulb_outline,color:Colors.orange),
+          children:[
+            Padding(
+              padding:const EdgeInsets.all(16),
+              child:Text(localizedLessonExample(lesson,english)),
+            ),
+          ],
+        ),
+        const SizedBox(height:16),
+        FilledButton.icon(
+          onPressed:()async{
+            await ProgressStore.completeLesson(lesson.id);
+            if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content:Text(english?'Lesson marked as completed.':'Lição marcada como concluída.')),
+            );
+          },
+          icon:const Icon(Icons.check),
+          label:Text(english?'Mark as completed':'Marcar como concluída'),
+        ),
+      ]),
+    );
+  }
 }
-
 class ToolsScreen extends StatelessWidget {
   const ToolsScreen({super.key});
   @override
@@ -591,18 +649,50 @@ class _QuizScreenState extends State<QuizScreen>{
   }
 }
 
-class ProgressScreen extends StatefulWidget {const ProgressScreen({super.key});@override State<ProgressScreen> createState()=>_ProgressScreenState();}
+class ProgressScreen extends StatefulWidget {
+  const ProgressScreen({super.key});
+  @override State<ProgressScreen> createState()=>_ProgressScreenState();
+}
 class _ProgressScreenState extends State<ProgressScreen>{
   late Future<Map<String,dynamic>> data;
   @override void initState(){super.initState();data=ProgressStore.read();}
-  @override Widget build(BuildContext context)=>FutureBuilder<Map<String,dynamic>>(future:data,builder:(context,s){final d=s.data??{};final lessons=List<String>.from(d['lessons']??[]);final scores=Map<String,dynamic>.from(d['bestScores']??{});return ListView(padding:const EdgeInsets.all(18),children:[
-    Row(children:[const Expanded(child:Text('O teu progresso',style:TextStyle(fontSize:27,fontWeight:FontWeight.w900))),IconButton(onPressed:()=>setState(()=>data=ProgressStore.read()),icon:const Icon(Icons.refresh))]),
-    Card(child:ListTile(leading:const Icon(Icons.menu_book,color:cyan),title:const Text('Lições concluídas'),trailing:Text('${lessons.length}'))),
-    Card(child:ListTile(leading:const Icon(Icons.quiz,color:cyan),title:const Text('Avaliações realizadas'),trailing:Text('${scores.length}'))),
-    const Text('Melhores resultados',style:TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
-    ...scores.entries.map((e)=>ListTile(title:Text(e.key),trailing:Text('${e.value} pontos'))),
-    if(lessons.isEmpty&&scores.isEmpty)const Text('Ainda não há progresso guardado. Conclui uma lição ou faz uma avaliação.')
-  ]); });
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return FutureBuilder<Map<String,dynamic>>(
+      future:data,
+      builder:(context,s){
+        final d=s.data??{};
+        final lessons=List<String>.from(d['lessons']??[]);
+        final scores=Map<String,dynamic>.from(d['bestScores']??{});
+        return ListView(padding:const EdgeInsets.all(18),children:[
+          Row(children:[
+            Expanded(child:Text(english?'Your progress':'O teu progresso',style:const TextStyle(fontSize:27,fontWeight:FontWeight.w900))),
+            IconButton(onPressed:()=>setState(()=>data=ProgressStore.read()),icon:const Icon(Icons.refresh)),
+          ]),
+          Card(child:ListTile(
+            leading:const Icon(Icons.menu_book,color:cyan),
+            title:Text(english?'Completed lessons':'Lições concluídas'),
+            trailing:Text(lessons.length.toString()),
+          )),
+          Card(child:ListTile(
+            leading:const Icon(Icons.quiz,color:cyan),
+            title:Text(english?'Assessments completed':'Avaliações realizadas'),
+            trailing:Text(scores.length.toString()),
+          )),
+          Text(english?'Best results':'Melhores resultados',style:const TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
+          ...scores.entries.map((entry)=>ListTile(
+            title:Text(entry.key),
+            trailing:Text(entry.value.toString()+(english?' points':' pontos')),
+          )),
+          if(lessons.isEmpty&&scores.isEmpty)
+            Text(english
+              ?'No progress has been saved yet. Complete a lesson or take a quiz.'
+              :'Ainda não há progresso guardado. Conclui uma lição ou faz uma avaliação.'),
+        ]);
+      },
+    );
+  }
 }
 class SettingsScreen extends StatelessWidget {
   final bool dark;
