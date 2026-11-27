@@ -415,6 +415,17 @@ class _CalculatorsScreenState extends State<CalculatorsScreen>{
   Widget field(TextEditingController c,String label)=>TextField(controller:c,keyboardType:const TextInputType.numberWithOptions(decimal:true),decoration:dec(label));
   Widget panel(String title,String formulaText,List<Widget> children)=>ListView(padding:const EdgeInsets.all(16),children:[Text(title,style:const TextStyle(fontSize:18,fontWeight:FontWeight.bold)),Text(formulaText,style:const TextStyle(color:cyan)),const SizedBox(height:12),...children]);
   Widget result(String s)=>Card(child:Padding(padding:const EdgeInsets.all(16),child:Text(s,style:const TextStyle(fontSize:23,fontWeight:FontWeight.bold,color:cyan))));
+  @override
+  void dispose() {
+    for (final controller in [
+      formula,mass,molar,moles,volume,densityMass,densityVolume,
+      solute,solution,c1,v1,v2,
+    ]) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
   @override Widget build(BuildContext context)=>DefaultTabController(length:6,child:Scaffold(appBar:AppBar(title:Text(_english?'Chemistry calculators':'Calculadoras químicas'),bottom:TabBar(isScrollable:true,tabs:[
     Tab(text:_english?'Molar mass':'Massa molar'),
     const Tab(text:'Mol'),
@@ -440,6 +451,12 @@ class _PeriodicScreenState extends State<PeriodicScreen>{
   final search=TextEditingController();
   String query='';
   bool get _english=>isEnglish(context);
+
+  @override
+  void dispose() {
+    search.dispose();
+    super.dispose();
+  }
 
   String _name(ChemicalElement element) =>
       _english ? (elementEnglishNames[element.symbol] ?? element.name) : element.name;
