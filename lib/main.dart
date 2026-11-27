@@ -386,26 +386,41 @@ class ReactionScreen extends StatelessWidget {
   const ReactionScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    const rows=[
-      ('Síntese','A + B → AB','2H₂ + O₂ → 2H₂O'),
-      ('Decomposição','AB → A + B','2H₂O₂ → 2H₂O + O₂'),
-      ('Deslocamento simples','A + BC → AC + B','Zn + 2HCl → ZnCl₂ + H₂'),
-      ('Dupla troca','AB + CD → AD + CB','AgNO₃ + NaCl → AgCl + NaNO₃'),
-      ('Neutralização','Ácido + Base → Sal + Água','HCl + KOH → KCl + H₂O')
-    ];
+    final english = isEnglish(context);
+    final rows = english
+      ?[
+        ('Synthesis','A + B → AB','2H₂ + O₂ → 2H₂O','Two or more reactants combine to form one product.'),
+        ('Decomposition','AB → A + B','2H₂O₂ → 2H₂O + O₂','One compound breaks into simpler substances.'),
+        ('Single displacement','A + BC → AC + B','Zn + 2HCl → ZnCl₂ + H₂','A more reactive element replaces another in a compound.'),
+        ('Double displacement','AB + CD → AD + CB','AgNO₃ + NaCl → AgCl + NaNO₃','Ions exchange partners; a precipitate may form.'),
+        ('Neutralization','Acid + Base → Salt + Water','HCl + KOH → KCl + H₂O','An acid and a base react to form water and a salt.'),
+      ]
+      :[
+        ('Síntese','A + B → AB','2H₂ + O₂ → 2H₂O','Duas ou mais substâncias combinam-se para formar um produto.'),
+        ('Decomposição','AB → A + B','2H₂O₂ → 2H₂O + O₂','Um composto divide-se em substâncias mais simples.'),
+        ('Deslocamento simples','A + BC → AC + B','Zn + 2HCl → ZnCl₂ + H₂','Um elemento mais reactivo substitui outro num composto.'),
+        ('Dupla troca','AB + CD → AD + CB','AgNO₃ + NaCl → AgCl + NaNO₃','Os iões trocam parceiros; pode formar-se um precipitado.'),
+        ('Neutralização','Ácido + Base → Sal + Água','HCl + KOH → KCl + H₂O','Um ácido e uma base reagem e formam água e um sal.'),
+      ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Tipos de reacções')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: rows.map((r) => Card(
-          child: ExpansionTile(
-            title: Text(r.$1),
-            subtitle: Text(r.$2),
-            leading: const Icon(Icons.science, color: cyan),
-            children: [Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text('Exemplo: ${r.$3}'),
-            )],
+      appBar:AppBar(title:Text(english?'Reaction types':'Tipos de reacções')),
+      body:ListView(
+        padding:const EdgeInsets.all(16),
+        children:rows.map((r)=>Card(
+          child:ExpansionTile(
+            title:Text(r.$1),
+            subtitle:Text(r.$2),
+            leading:const Icon(Icons.science,color:cyan),
+            children:[
+              Padding(
+                padding:const EdgeInsets.fromLTRB(16,0,16,8),
+                child:Text((english?'Example: ':'Exemplo: ')+r.$3,style:const TextStyle(fontWeight:FontWeight.w800)),
+              ),
+              Padding(
+                padding:const EdgeInsets.fromLTRB(16,0,16,16),
+                child:Text(r.$4,style:const TextStyle(height:1.4)),
+              ),
+            ],
           ),
         )).toList(),
       ),
@@ -414,12 +429,43 @@ class ReactionScreen extends StatelessWidget {
 }
 class NomenclatureScreen extends StatelessWidget {
   const NomenclatureScreen({super.key});
-  @override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Nomenclatura química')),body:ListView(padding:const EdgeInsets.all(16),children:const[
-    _NameCard('Óxidos','Compostos binários do oxigénio com outro elemento.',['CO2 — dióxido de carbono','SO3 — trióxido de enxofre','Fe2O3 — óxido de ferro (III)']),
-    _NameCard('Ácidos','Em solução aquosa, aumentam a concentração de H3O+.',['HCl — ácido clorídrico','H2SO4 — ácido sulfúrico','HNO3 — ácido nítrico']),
-    _NameCard('Bases','Incluem hidróxidos que podem fornecer OH− em água.',['NaOH — hidróxido de sódio','KOH — hidróxido de potássio','Ca(OH)2 — hidróxido de cálcio']),
-    _NameCard('Sais','Compostos iónicos constituídos por catiões e aniões.',['NaCl — cloreto de sódio','KCl — cloreto de potássio','CaCO3 — carbonato de cálcio'])
-  ]));
+  @override
+  Widget build(BuildContext context) {
+    final english = isEnglish(context);
+    return Scaffold(
+      appBar:AppBar(title:Text(english?'Chemical nomenclature':'Nomenclatura química')),
+      body:ListView(padding:const EdgeInsets.all(16),children:[
+        _NameCard(
+          english?'Oxides':'Óxidos',
+          english?'Binary compounds of oxygen with another element.':'Compostos binários do oxigénio com outro elemento.',
+          english
+            ?['CO₂ — carbon dioxide','SO₃ — sulfur trioxide','Fe₂O₃ — iron(III) oxide']
+            :['CO2 — dióxido de carbono','SO3 — trióxido de enxofre','Fe2O3 — óxido de ferro (III)'],
+        ),
+        _NameCard(
+          english?'Acids':'Ácidos',
+          english?'In aqueous solution, acids increase the concentration of H₃O⁺ ions.':'Em solução aquosa, aumentam a concentração de H3O+.',
+          english
+            ?['HCl — hydrochloric acid','H₂SO₄ — sulfuric acid','HNO₃ — nitric acid']
+            :['HCl — ácido clorídrico','H2SO4 — ácido sulfúrico','HNO3 — ácido nítrico'],
+        ),
+        _NameCard(
+          english?'Bases':'Bases',
+          english?'Bases include hydroxides that can release OH⁻ ions in water.':'Incluem hidróxidos que podem fornecer OH− em água.',
+          english
+            ?['NaOH — sodium hydroxide','KOH — potassium hydroxide','Ca(OH)₂ — calcium hydroxide']
+            :['NaOH — hidróxido de sódio','KOH — hidróxido de potássio','Ca(OH)2 — hidróxido de cálcio'],
+        ),
+        _NameCard(
+          english?'Salts':'Sais',
+          english?'Ionic compounds made of positive and negative ions.':'Compostos iónicos constituídos por catiões e aniões.',
+          english
+            ?['NaCl — sodium chloride','KCl — potassium chloride','CaCO₃ — calcium carbonate']
+            :['NaCl — cloreto de sódio','KCl — cloreto de potássio','CaCO3 — carbonato de cálcio'],
+        ),
+      ]),
+    );
+  }
 }
 class _NameCard extends StatelessWidget {
   final String title,description;final List<String> examples;
