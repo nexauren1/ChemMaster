@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../chemistry/equation_balancer.dart';
 import '../chemistry/equation_analysis.dart';
-import '../chemistry/formula_parser.dart';
 import '../core/chem_language.dart';
 import '../data/chemical_catalog.dart';
 import '../widgets/chemical_picker.dart';
